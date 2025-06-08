@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/mp-collections-react-tailwind/static/css/main.1570ab57.css",
+    "main.js": "/mp-collections-react-tailwind/static/js/main.aaf30e40.js",
+    "index.html": "/mp-collections-react-tailwind/index.html",
+    "main.1570ab57.css.map": "/mp-collections-react-tailwind/static/css/main.1570ab57.css.map",
+    "main.aaf30e40.js.map": "/mp-collections-react-tailwind/static/js/main.aaf30e40.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.1570ab57.css",
+    "static/js/main.aaf30e40.js"
+  ]
+}
