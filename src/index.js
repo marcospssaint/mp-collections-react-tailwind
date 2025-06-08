@@ -1,17 +1,58 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import App from './App'
+import Movies from './pages/Movies'
+import Books from './pages/Books'
+import './index.css'
+import Series from './pages/Series'
+import Home from './pages/Home'
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
+import { DataProvider } from './context/DataContext'
+
+import ProtectedRoute from './ProtectedRoute';
+import Login from './Login';
+
+ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+    <BrowserRouter>
+      <Routes>
+        {/* Rota pública de Login */}
+        <Route path="/login" element={<Login />} />
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+        <Route path="/" element={
+          <ProtectedRoute>
+            <DataProvider>
+              <App />
+            </DataProvider>
+          </ProtectedRoute>
+        }>
+
+          {/* Página inicial */}
+          <Route path="/home" element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          } />
+
+          {/* Outras páginas */}
+          <Route path="/movies" element={
+            <ProtectedRoute>
+              <Movies />
+            </ProtectedRoute>
+          } />
+          <Route path="/series" element={
+            <ProtectedRoute>
+                <Series />
+              </ProtectedRoute>
+          } />
+          <Route path="/books" element={
+            <ProtectedRoute>
+                <Books />
+              </ProtectedRoute>
+          } />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  </React.StrictMode>
+)
