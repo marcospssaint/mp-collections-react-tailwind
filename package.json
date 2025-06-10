@@ -2,7 +2,7 @@
   "name": "mp-collections-react-tailwind",
   "version": "1.0.0",
   "private": true,
-  "homepage": "https://github.com/marcospssaint/mp-collections-react-tailwind",
+  "homepage": "https://marcospssaint.github.io/mp-collections-react-tailwind/",
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "autoprefixer": "^10.4.16",
