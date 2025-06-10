@@ -213,21 +213,17 @@ function Modal({ livro, livros, onClose, onSelectRelated }) {
                   }}
                 />
 
-                {livro.synopsis && (
-                  <div className="mb-4">
-                    <h4 className="text-sm font-semibold text-gray-800 mb-1">Sinopse</h4>
-                    <p className="text-sm text-gray-700 whitespace-pre-line bg-gray-50 p-3 rounded-md border max-h-40 overflow-y-auto">
-                      {livro.synopsis}
-                    </p>
-                  </div>
-                )}
+                <div className="mb-4">
+                  <h4 className="text-sm font-semibold text-gray-800 mb-1">Sinopse</h4>
+                  <p className="text-gray-700 leading-relaxed">
+                    {livro?.synopsis}
+                  </p>
+                </div>
 
                 {livro.notes && (
-                  <div className="mb-4">
-                    <h4 className="text-sm font-semibold text-gray-800 mb-1">Notas</h4>
-                    <p className="text-sm text-gray-700 whitespace-pre-line bg-gray-50 p-3 rounded-md border max-h-32 overflow-y-auto">
-                      {livro.notes}
-                    </p>
+                  <div className="bg-gray-50 border border-gray-200 rounded p-3 text-sm text-gray-600 whitespace-pre-line">
+                    <strong>Notas:</strong>
+                    <p className="mt-1">{livro.notes}</p>
                   </div>
                 )}
               </div>

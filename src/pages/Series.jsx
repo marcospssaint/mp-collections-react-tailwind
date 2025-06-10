@@ -2,12 +2,11 @@ import { ListBulletIcon, Squares2X2Icon } from '@heroicons/react/24/outline';
 import { Bookmark, Eye, TvIcon } from "lucide-react";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
 
-//import data from '../data/tvSeries.json'
 import { FilterSheets } from "../components/FilterSheets";
 import { Pagination } from "../components/Pagination";
 import { DataContext } from "../context/DataContext";
 import { CATEGORY_ANIMES, CATEGORY_TV_SHOWS, CATEGORY_TV_TOKUSATSU, SHEET_ANIMES, SHEET_SERIES, SHEET_TV_SHOWS, SHEET_TV_TOKUSATSU } from "../utils/constantes";
-import { getOwnedList, getSanitizedImage, isNotNullOrEmpty, isNullOrEmpty, isFlagTrue } from "../utils/utils";
+import { getOwnedList, getSanitizedImage, isNotNullOrEmpty, isNullOrEmpty, isFlagTrue, getValueOrDafault } from "../utils/utils";
 import { ControlStatusComponent } from '../components/ControlStatusComponent';
 
 function getTotalEpisodes(episodesString) {
@@ -18,20 +17,97 @@ function getTotalEpisodes(episodesString) {
   return episodesString;
 }
 
-// Modal Component
+const SeasonAccordion = ({ seasons }) => {
+  const [openId, setOpenId] = useState(null);
+
+  const toggleOpen = (id) => {
+    setOpenId(openId === id ? null : id);
+  };
+
+  return (
+    <div className="space-y-3">
+      {seasons.map((season) => {
+        const totalEpisodes = getTotalEpisodes(season.episodes);
+        const isOpen = openId === season.id;
+
+        return (
+          <div key={season.id} className="border rounded-md bg-gray-50 overflow-hidden">
+            {/* Accordion Header */}
+            <button
+              onClick={() => toggleOpen(season.id)}
+              className="w-full text-left px-4 py-3 flex flex-col sm:flex-row sm:justify-between sm:items-center hover:bg-gray-100 transition"
+            >
+              <h4 className="text-lg font-semibold">
+                {(season.type === "OVA" || season.type === "Movie") && (
+                  <>
+                    {getValueOrDafault(season.subtitle, season.original_title)} (
+                    <strong className="text-sm text-gray-600">{season?.year}</strong>) - {season.type}
+                  </>
+                )}
+                {season.type === "TV Show" && (
+                  <>
+                    Temporada {season.season} (
+                    <strong className="text-sm text-gray-600">{season?.year}</strong>)
+                  </>
+                )}
+              </h4>
+              <span className="text-sm text-gray-600 mt-2 sm:mt-0">
+                Episódios assistidos: <strong>{season.watched_episodes || 0}</strong> / {totalEpisodes}
+              </span>
+            </button>
+
+            {/* Accordion Content */}
+            {isOpen && (
+              <div className="px-4 pb-4">
+                {season.subtitle && (
+                  <p className="text-gray-700 text-sm mb-2">
+                    {getValueOrDafault(season.original_title, season.subtitle)}
+                  </p>
+                )}
+
+                {season.synopsis && (
+                  <p className="text-gray-700 text-sm mb-2">{season.synopsis}</p>
+                )}
+
+                <p className="text-sm">
+                  <strong>Episódios na coleção:</strong> {getOwnedList(season.episodes)} / {totalEpisodes}
+                </p>
+
+                <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-1 mt-2">
+                  {Array.from({ length: totalEpisodes }).map((_, index) => {
+                    const epNum = index + 1;
+                    const isOwned = epNum <= season.watched_episodes;
+                    return (
+                      <div
+                        key={epNum}
+                        className={`w-6 h-6 text-xs flex items-center justify-center rounded ${isOwned ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-400"}`}
+                      >
+                        {epNum}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
 function Modal({ data, onClose }) {
   if (!data || !Array.isArray(data)) return null;
 
   const mainSeries = data.find((item) => isNullOrEmpty(item.season));
-  const seasons = data.filter((item) => !isNullOrEmpty(item.season));
+  const seasons = data.filter((item) => isNotNullOrEmpty(item.season));
   const [activeTab, setActiveTab] = useState("serie");
 
   return (
-    <>
-      <div
-        className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
-        onClick={onClose}
-      />
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+      onClick={onClose}
+    >
       <div className="fixed inset-0 flex justify-center items-center z-50 p-4 overflow-auto">
         <div
           className="bg-white rounded-lg shadow-lg max-w-4xl w-full max-h-full overflow-y-auto p-4 sm:p-6 relative"
@@ -62,15 +138,13 @@ function Modal({ data, onClose }) {
 
           {activeTab === "serie" && (
             <div className="grid grid-cols-1 md:grid-cols-[auto,1fr] gap-4 md:gap-6">
-              {mainSeries?.img && (
-                <div className="w-full md:w-48 aspect-w-3 aspect-h-4 rounded-lg overflow-hidden flex-shrink-0">
-                  <img
-                    src={getSanitizedImage(mainSeries)}
-                    alt={mainSeries.title}
-                    className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform"
-                  />
-                </div>
-              )}
+              <div className="w-full md:w-48 aspect-[2/3] rounded overflow-hidden flex-shrink-0">
+                <img
+                  src={getSanitizedImage(mainSeries)}
+                  alt={mainSeries?.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
 
               <div className="space-y-4">
                 <h2 className="text-xl font-bold mb-2 text-gray-800">
@@ -81,10 +155,6 @@ function Modal({ data, onClose }) {
                     {mainSeries?.original_title}
                   </p>
                 )}
-                <p className="text-gray-700 leading-relaxed">
-                  {mainSeries?.synopsis}
-                </p>
-
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm sm:text-base">
                   <div className="flex flex-wrap gap-1">
                     <strong>Gênero:</strong>
@@ -92,7 +162,10 @@ function Modal({ data, onClose }) {
                       ? mainSeries.genre.split(",").map((g) => (
                         <span
                           key={g.trim()}
-                          className="bg-gray-200 text-gray-800 text-xs font-medium px-2 py-0.5 rounded"
+                          className={`inline-block px-2 py-0.5 mr-1 rounded text-xs font-medium ${g.toLowerCase().includes("erotic") || g.toLowerCase().includes("adult")
+                            ? "bg-red-100 text-red-700"
+                            : "bg-blue-100 text-blue-700"
+                            }`}
                         >
                           {g.trim()}
                         </span>
@@ -102,84 +175,41 @@ function Modal({ data, onClose }) {
                       )}
                   </div>
                   <p>
-                    <strong>Tipo:</strong> {mainSeries?.type || "N/A"}
-                  </p>
-                  <p>
-                    <strong>Países:</strong> {mainSeries?.countries || "N/A"}
-                  </p>
-                  <p>
-                    <strong>Na coleção:</strong>{" "}
-                    {isFlagTrue(mainSeries?.owned) ? (
-                      <span className="text-blue-600 font-semibold">Sim</span>
-                    ) : (
-                      "Não"
-                    )}
+                    <strong>País(es): </strong>
+                    {mainSeries?.countries?.split(",").map((c) => (
+                      <span
+                        key={c?.trim()}
+                        className="inline-block px-2 py-0.5 mr-1 rounded text-xs font-medium bg-blue-100 text-blue-700"
+                      >
+                        {c.trim() || "N/A"}
+                      </span>
+                    ))}
                   </p>
                 </div>
+                <div className="mb-4">
+                  <h4 className="text-sm font-semibold text-gray-800 mb-1">Sinopse</h4>
+                  <p className="text-gray-700 leading-relaxed">
+                    {mainSeries?.synopsis}
+                  </p>
+                </div>
+                {mainSeries.notes && (
+                  <div className="bg-gray-50 border border-gray-200 rounded p-3 text-sm text-gray-600 whitespace-pre-line">
+                    <strong>Notas:</strong>
+                    <p className="mt-1">{mainSeries.notes}</p>
+                  </div>
+                )}
               </div>
             </div>
           )}
 
           {activeTab === "seasons" && (
             <div className="space-y-4 max-h-[75vh] overflow-y-auto pr-1">
-              {seasons.map((season) => {
-                const totalEpisodes = getTotalEpisodes(season.episodes);
-                return (
-                  <div key={season.id} className="border rounded-md p-3 bg-gray-50">
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2">
-                      <h4 className="text-lg font-semibold">
-                        Temporada {season.season} ({season.year})
-                      </h4>
-
-                      <span className="text-sm text-gray-600">
-                        Episódios assistidos: <strong>{season.watched_episodes || 0}</strong> / {totalEpisodes}
-                      </span>
-                    </div>
-
-                    <div>
-                      {season.subtitle && (
-                        <p className="text-gray-700 text-sm mb-2"><strong>{season.subtitle}</strong></p>
-                      )}
-                    </div>
-
-                    <div className="text-sm mb-2">
-                      <p><strong>Tipo:</strong> {season.type || "TV Show"}</p>
-                      <p><strong>Na coleção:</strong> {isFlagTrue(season.owned) ? "Sim" : "Não"}</p>
-                    </div>
-
-                    {season.synopsis && (
-                      <p className="text-gray-700 text-sm mb-2">{season.synopsis}</p>
-                    )}
-
-                    <div>
-                      <p className="text-sm">
-                        <strong>Episódios na coleção:</strong> {getOwnedList(season.episodes)} / {totalEpisodes}
-                      </p>
-                      <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-1 mt-2">
-                        {Array.from({ length: totalEpisodes }).map((_, index) => {
-                          const epNum = index + 1;
-                          const isOwned = epNum <= season.watched_episodes;
-                          return (
-                            <div
-                              key={epNum}
-                              className={`w-6 h-6 text-xs flex items-center justify-center rounded ${isOwned ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-400"}`}
-                            >
-                              {epNum}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                )
-              }
-              )}
-
+              <SeasonAccordion seasons={seasons} />
             </div>
           )}
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
@@ -191,8 +221,21 @@ export default function Series() {
   const { dataSheets } = useContext(DataContext);
   const series = dataSheets[SHEET_SERIES] || []
 
-  //const [series, setSeries] = useState([]);
-  const [filteredSeries, setFilteredSeries] = useState(series);
+  const seriesC = useMemo(() => {
+    return series.map((s) => {
+      // Se o serie NÃO for uma coleção, mas fizer parte de uma (mesmo título)
+      const serieParent = series.find((c) => c.title === s.title && isNullOrEmpty(c.season));
+
+      // Herança reversa: se o serie for filho, herda campos do pai se não tiver
+      return {
+        ...s,
+        countries: getValueOrDafault(s.countries, serieParent?.countries),
+        genre: getValueOrDafault(s.genre, serieParent?.genre),
+      };
+    })
+  }, [series])
+
+  const [filteredSeries, setFilteredSeries] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedSeries, setSelectedSeries] = useState(null);
   const [viewMode, setViewMode] = useState("grid"); // 'grid' ou 'list'
@@ -202,6 +245,10 @@ export default function Series() {
   useEffect(() => {
     setCurrentPage(1);
   }, []);
+
+  useEffect(() => {
+    setFilteredSeries(seriesC);
+  }, [seriesC]); // This effect runs whenever 'seriesC' changes
 
   const isAdultGenre = (genre = "") =>
     genre.toLowerCase().includes("adult") || genre.toLowerCase().includes("erotic");
@@ -223,32 +270,12 @@ export default function Series() {
       filteredSeries.find((s) => s.title === title)
     );
 
-  const groupByTitle = (title) => series.filter((s) => s.title === title);
-
-  // Função para detectar se o título tem temporadas com episódios não assistidos
-  const hasNewSeasons = (title) => {
-    const seasons = series.filter((item) => item.title === title && !isNullOrEmpty(item.season) && !isNullOrEmpty(item.year));
-
-    if (seasons.length === 0) return false;
-
-    // Verifica se já assistiu ao menos um episódio em qualquer temporada
-    const watchedAny = seasons.some((ep) => ep.watched === "W");
-    if (!watchedAny) return false;
-
-    // Ano da temporada mais recente
-    const latestYear = Math.max(...seasons.map((s) => s.year));
-
-    // Episódios da temporada mais recente
-    const latestSeasonEpisodes = seasons.filter((s) => s.year === latestYear);
-
-    // Se tem episódio não assistido na última temporada, retorna true
-    return latestSeasonEpisodes.some((ep) => ep.watched !== "W");
-  };
+  const groupByTitle = (title) => seriesC.filter((s) => s.title === title);
 
   const newSeasonMap = useMemo(() => {
     const map = {};
 
-    const grouped = series.reduce((acc, item) => {
+    const grouped = seriesC.reduce((acc, item) => {
       if (!acc[item.title]) acc[item.title] = [];
       acc[item.title].push(item);
       return acc;
@@ -278,16 +305,16 @@ export default function Series() {
     }
 
     return map;
-  }, [series]);
+  }, [seriesC]);
 
   const checkAllSeasonsWatched = (title) => {
-    const seasons = series.filter((item) => item.title === title && !isNullOrEmpty(item.season));
+    const seasons = seriesC.filter((item) => item.title === title && !isNullOrEmpty(item.season));
     if (seasons.length === 0) return false; // se não tem temporadas, não considera "tudo assistido"
     return seasons.length > 0 && seasons.every((item) => item.watched === "W");
   };
 
   const checkStatusSeasonsWatched = (title) => {
-    const seasons = series.filter((item) => item.title === title && !isNullOrEmpty(item.season));
+    const seasons = seriesC.filter((item) => item.title === title && !isNullOrEmpty(item.season));
     if (seasons.length === 0) return 'NOTW'; // se não tem temporadas, não considera "tudo assistido"
 
     if (seasons.every((item) => item.watched === "W")) return "W";
@@ -297,7 +324,7 @@ export default function Series() {
   };
 
   const checkAllSeasonsOwned = (title) => {
-    const seasons = series.filter((item) => item.title === title && !isNullOrEmpty(item.season));
+    const seasons = seriesC.filter((item) => item.title === title && !isNullOrEmpty(item.season));
     if (seasons.length === 0) return false; // sem temporadas, não considera "tudo owned"
     return seasons.length > 0 && seasons.every((item) => item.owned === 'TRUE');
   };
@@ -305,7 +332,7 @@ export default function Series() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white p-4 md:p-6">
       <FilterSheets
-        dataSheets={series}
+        dataSheets={seriesC}
         onFilter={setFilteredSeries}
         estatisticas={{
           tipo: "serie",
@@ -358,7 +385,7 @@ export default function Series() {
           {viewMode === "grid" && (
             <div ref={gridRef} className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-5">
               {paginatedSeries.map((s) => {
-                const main = series.find((item) => item.title === s.title && isNullOrEmpty(item.season)) || s;
+                const main = seriesC.find((item) => item.title === s.title && isNullOrEmpty(item.season)) || s;
 
                 const allWatched = checkAllSeasonsWatched(s.title);
                 const allOwned = checkAllSeasonsOwned(s.title);
@@ -429,7 +456,7 @@ export default function Series() {
             const allWatched = checkStatusSeasonsWatched(s.title);
             const allOwned = checkAllSeasonsOwned(s.title);
 
-            const mainSerie = series.find((item) => item.title === s.title && isNullOrEmpty(item.season)) || s;
+            const mainSerie = seriesC.find((item) => item.title === s.title && isNullOrEmpty(item.season)) || s;
 
             const main = { ...mainSerie, owned: allOwned ? 'TRUE' : 'FALSE' }
             const imageSrc = getSanitizedImage(main);

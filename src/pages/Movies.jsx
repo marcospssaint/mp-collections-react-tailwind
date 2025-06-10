@@ -76,7 +76,7 @@ function MovieModal({ movie, movies, onClose, onSelectRelated }) {
 
                 {/* Informações Gerais */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
-                  <p><strong>Ano:</strong> {movie.year || "N/A"}</p>
+                  <p><strong>Ano:</strong> {getValueOrDafault(movie.year, "N/A")}</p>
                   <p><strong>País(es): </strong>
                     {movie?.countries?.split(",").map((g) => (
                       <span
@@ -116,18 +116,15 @@ function MovieModal({ movie, movies, onClose, onSelectRelated }) {
                       completo: "Assistido",
                       pacialmente: "Parcialmente assistido",
                     }
-
                   }}
                 />
 
-                {movie.synopsis && (
-                  <div className="mb-4">
-                    <h4 className="text-sm font-semibold text-gray-800 mb-1">Sinopse</h4>
-                    <p className="text-sm text-gray-700 whitespace-pre-line bg-gray-50 p-3 rounded-md border max-h-40 overflow-y-auto">
-                      {movie.synopsis}
-                    </p>
-                  </div>
-                )}
+                <div className="mb-4">
+                  <h4 className="text-sm font-semibold text-gray-800 mb-1">Sinopse</h4>
+                  <p className="text-gray-700 leading-relaxed">
+                    {getValueOrDafault(movie?.synopsis, "N/A")}
+                  </p>
+                </div>
 
                 {movie?.notes && (
                   <div className="bg-gray-50 border border-gray-200 rounded p-3 text-sm text-gray-600 whitespace-pre-line">
