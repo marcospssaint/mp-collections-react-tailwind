@@ -97,7 +97,7 @@ export function FilterSheets({ dataSheets, onFilter, estatisticas, categoriesOpt
     selectedYear && { label: selectedYear, onClear: () => setSelectedYear("") },
     selectedCategory && { label: selectedCategory, onClear: () => setSelectedCategory("") },
     showWatched && { label: "Assistidos", onClear: () => setShowWatched(false) },
-    showOwned && { label: "Possuídos", onClear: () => setShowOwned(false) },
+    showOwned && { label: "Na coleção", onClear: () => setShowOwned(false) },
     showAdult && { label: "+18", onClear: () => setShowAdult(false) },
     searchTerm && { label: `Busca: "${searchTerm}"`, onClear: () => setSearchTerm("") },
   ].filter(Boolean);

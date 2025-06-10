@@ -8,6 +8,7 @@ import { Pagination } from "../components/Pagination";
 import { DataContext } from "../context/DataContext";
 import { CATEGORY_ANIMES, CATEGORY_TV_SHOWS, CATEGORY_TV_TOKUSATSU, SHEET_ANIMES, SHEET_SERIES, SHEET_TV_SHOWS, SHEET_TV_TOKUSATSU } from "../utils/constantes";
 import { getOwnedList, getSanitizedImage, isNotNullOrEmpty, isNullOrEmpty, isFlagTrue } from "../utils/utils";
+import { ControlStatusComponent } from '../components/ControlStatusComponent';
 
 function getTotalEpisodes(episodesString) {
   if (typeof episodesString === 'string') {
@@ -107,7 +108,7 @@ function Modal({ data, onClose }) {
                     <strong>Países:</strong> {mainSeries?.countries || "N/A"}
                   </p>
                   <p>
-                    <strong>Possuído:</strong>{" "}
+                    <strong>Na coleção:</strong>{" "}
                     {isFlagTrue(mainSeries?.owned) ? (
                       <span className="text-blue-600 font-semibold">Sim</span>
                     ) : (
@@ -123,26 +124,32 @@ function Modal({ data, onClose }) {
             <div className="space-y-4 max-h-[75vh] overflow-y-auto pr-1">
               {seasons.map((season) => {
                 const totalEpisodes = getTotalEpisodes(season.episodes);
-
                 return (
                   <div key={season.id} className="border rounded-md p-3 bg-gray-50">
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2">
                       <h4 className="text-lg font-semibold">
                         Temporada {season.season} ({season.year})
                       </h4>
+
                       <span className="text-sm text-gray-600">
                         Episódios assistidos: <strong>{season.watched_episodes || 0}</strong> / {totalEpisodes}
                       </span>
                     </div>
 
-                    {season.synopsis && (
-                      <p className="text-gray-700 text-sm mb-2">{season.synopsis}</p>
-                    )}
+                    <div>
+                      {season.subtitle && (
+                        <p className="text-gray-700 text-sm mb-2"><strong>{season.subtitle}</strong></p>
+                      )}
+                    </div>
 
                     <div className="text-sm mb-2">
                       <p><strong>Tipo:</strong> {season.type || "TV Show"}</p>
-                      <p><strong>Possuído:</strong> {isFlagTrue(season.owned) ? "Sim" : "Não"}</p>
+                      <p><strong>Na coleção:</strong> {isFlagTrue(season.owned) ? "Sim" : "Não"}</p>
                     </div>
+
+                    {season.synopsis && (
+                      <p className="text-gray-700 text-sm mb-2">{season.synopsis}</p>
+                    )}
 
                     <div>
                       <p className="text-sm">
@@ -248,7 +255,7 @@ export default function Series() {
     }, {});
 
     for (const [title, seasons] of Object.entries(grouped)) {
-      
+
       const validSeasons = seasons.filter(
         (item) => !isNullOrEmpty(item.season) && !isNullOrEmpty(item.year)
       );
@@ -263,7 +270,7 @@ export default function Series() {
         map[title] = false;
         continue;
       }
- 
+
       const latestYear = Math.max(...validSeasons.map((s) => s.year));
       const latestSeasonEpisodes = validSeasons.filter((s) => Number(s.year) === latestYear);
 
@@ -419,10 +426,12 @@ export default function Series() {
       {viewMode === "list" && (
         <div className="space-y-3">
           {paginatedSeries.map((s) => {
-            const main = series.find((item) => item.title === s.title && isNullOrEmpty(item.season)) || s;
-
             const allWatched = checkStatusSeasonsWatched(s.title);
             const allOwned = checkAllSeasonsOwned(s.title);
+
+            const mainSerie = series.find((item) => item.title === s.title && isNullOrEmpty(item.season)) || s;
+
+            const main = { ...mainSerie, owned: allOwned ? 'TRUE' : 'FALSE' }
             const imageSrc = getSanitizedImage(main);
 
             return (
@@ -466,33 +475,21 @@ export default function Series() {
                       </span>
                     )}
                   </div>
-                  <div className="mt-2 grid gap-2 sm:grid-cols-2 text-sm">
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center gap-1 bg-green-50 text-green-700 px-3 py-1 rounded-full shadow-sm">
-                        <span className="text-base">🗂️</span>
-                        <span className="font-semibold">Na coleção:</span>
-                        <span>{allOwned ? "Sim" : "Não"}</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className={`flex items-center gap-1 px-3 py-1 rounded-full shadow-sm ${allWatched === "W"
-                        ? "bg-blue-50 text-blue-700"
-                        : allWatched === "P"
-                          ? "bg-yellow-50 text-yellow-700"
-                          : "bg-red-50 text-red-700"
-                        }`}>
-                        <span className="text-base">👁️‍🗨️</span>
-                        <span className="font-semibold">Status:</span>
-                        <span>
-                          {allWatched === "W"
-                            ? "Assistido"
-                            : allWatched === "P"
-                              ? "Parcialmente assistido"
-                              : "Não assistido"}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+                  <ControlStatusComponent
+                    data={main}
+                    status={{
+                      emoji: "👁️‍🗨️",
+                      condicoes: {
+                        completo: allWatched === "W",
+                        pacialmente: allWatched === "P"
+                      },
+                      labels: {
+                        incompleto: "Não assistido",
+                        completo: "Assistido",
+                        pacialmente: "Parcialmente assistido",
+                      }
+                    }}
+                  />
                 </div>
               </div>
             );

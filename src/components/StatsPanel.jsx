@@ -86,7 +86,7 @@ export default function StatsPanel({ data = [], title = '🎬 Itens', slug = 'it
             <Indicator label="🎞️ Total" value={stats.total} />
             <Indicator label="✅ Assistidos" value={stats.watched} color="green" />
             <Indicator label="📌 Pendentes" value={stats.unwatched} color="red" />
-            <Indicator label="📀 Possuídos" value={stats.owned} color="blue" />
+            <Indicator label="🗂️ Na coleção" value={stats.owned} color="blue" />
             <Indicator label="🌍 Países" value={stats.countries} color="indigo" />
             <Indicator label="🎭 Gêneros" value={stats.genres} color="purple" />
             <Indicator label="🔞 +18" value={stats.adultCount} color="rose" />

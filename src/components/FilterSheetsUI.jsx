@@ -41,7 +41,7 @@ export default function FilterSheetsUI({
                 {/* Toggles e Ordenação */}
                 <div className="flex flex-wrap items-center gap-4 mt-2">
                     <Toggle checked={showWatched} onChange={setShowWatched} label="Assistidos" />
-                    <Toggle checked={showOwned} onChange={setShowOwned} label="Possuídos" />
+                    <Toggle checked={showOwned} onChange={setShowOwned} label="Na coleção" />
                     <Toggle checked={showAdult} onChange={setShowAdult} label="Mostrar +18" />
 
                     <div className="ml-auto flex items-center">
