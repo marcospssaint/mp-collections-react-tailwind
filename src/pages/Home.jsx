@@ -123,8 +123,35 @@ export default function Home() {
     setSheetData
   ]);
 
-  if (loading) return <p>Carregando dados...</p>;
-  if (error) return <p className="text-red-600">Erro: {error}</p>;
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <div className="flex flex-col items-center space-y-4">
+        <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        <p className="text-lg text-gray-700 font-medium">Carregando dados...</p>
+      </div>
+    </div>
+  );
+  if (error)
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-red-50">
+      <div className="flex items-center space-x-3 bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded-lg shadow">
+        <svg
+          className="w-6 h-6 text-red-600"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+        <span className="text-sm font-medium">Erro: {error}</span>
+      </div>
+    </div>
+  );
   const panels = [
     {
       key: <StatsPanel title="🎬 Filmes" slug="movies" data={dataSheets[SHEET_MOVIES] || []} />,

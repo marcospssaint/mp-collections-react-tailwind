@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import App from './App'
 import Movies from './pages/Movies'
 import Books from './pages/Books'
@@ -15,7 +15,7 @@ import Login from './Login';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         {/* Rota pública de Login */}
         <Route path="/login" element={<Login />} />
@@ -53,6 +53,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           } />
         </Route>
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   </React.StrictMode>
 )

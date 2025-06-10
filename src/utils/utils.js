@@ -38,9 +38,7 @@ function groupSeasonsByTitle(flatSeasons) {
 }
 
 export async function fetchTmdbMovieId(title, year) {
-  const url = `https://api.themoviedb.org/3/search/movie?api_key=${process.env.REACT_APP_TMDB_API_KEY}&language=pt-BR&query=${encodeURIComponent(
-    title
-  )}&year=${year}&page=1&include_adult=false`;
+  const url = `${process.env.REACT_APP_URL_TMDB_MOVIE}?title=${encodeURIComponent(title)}&year=${year}`;
 
   const res = await fetch(url);
   if (!res.ok) throw new Error("Erro na busca TMDb");
@@ -50,7 +48,7 @@ export async function fetchTmdbMovieId(title, year) {
 }
 
 export async function fetchCastAndCrew(tmdbId) {
-  const url = `https://api.themoviedb.org/3/movie/${tmdbId}/credits?api_key=${process.env.REACT_APP_TMDB_API_KEY}&language=pt-BR`;
+  const url = `${process.env.REACT_APP_URL_TMDB_CREDITS}?tmdbId=${tmdbId}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error("Erro ao buscar elenco");
 
@@ -66,12 +64,7 @@ export async function fetchSheetData({ sheetName }) {
     throw new Error("sheetName é obrigatório");
   }
 
-  const sheetId = process.env.REACT_APP_SHEET_ID;
-  const apiKey = process.env.REACT_APP_API_KEY;
-
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetName}?key=${apiKey}`;
-
-  const response = await fetch(url);
+  const response = await fetch(`${process.env.REACT_APP_URL_SHEETS}?sheetName=${encodeURIComponent(sheetName)}`);
   if (!response.ok) {
     throw new Error(`Erro ao buscar dados da planilha: ${response.statusText}`);
   }
@@ -97,7 +90,7 @@ function parseSheetData(rows) {
   });
 }
 
-export function isOwned(value) {
+export function isFlagTrue(value) {
   return value === 'TRUE';
 }
 
@@ -142,5 +135,6 @@ export function isNullOrEmpty(value) {
 }
 
 export function getSanitizedImage(value) {
-  return value?.img?.replace(/"/g, "") || "/imagens/imgDefault.png";
+  if (isNullOrEmpty(value?.img)) return `${process.env.PUBLIC_URL}/imagens/imgDefault.png`;
+  return value?.img?.replace(/"/g, "");
 }

@@ -1,112 +1,148 @@
-import React, { useState, useEffect, useMemo, useRef, useContext } from "react";
-import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
-import CountUp from "react-countup";
-import { motion, AnimatePresence } from "framer-motion";
-import { Squares2X2Icon, ListBulletIcon } from '@heroicons/react/24/outline';
-import { fetchCastAndCrew, fetchSheetData, fetchTmdbMovieId, getSanitizedImage } from "../utils/utils";
-import { DataContext } from "../context/DataContext";
-import { Pagination } from "../components/Pagination";
+import { ListBulletIcon, Squares2X2Icon } from '@heroicons/react/24/outline';
+import { useContext, useEffect, useRef, useState } from "react";
+import { ControlStatusComponent } from "../components/ControlStatusComponent";
 import { FilterSheets } from "../components/FilterSheets";
+import { Pagination } from "../components/Pagination";
+import { DataContext } from "../context/DataContext";
+import { fetchCastAndCrew, fetchTmdbMovieId, getSanitizedImage, getValueOrDafault } from "../utils/utils";
 
-function MovieModal({ movie, onClose }) {
+function MovieModal({ movie, movies, onClose, onSelectRelated }) {
   if (!movie) return null;
 
-  const mainMovie = {
-    ...movie,
-    img: movie.img?.replace(/"/g, "")
-  };
+  const [activeTab, setActiveTab] = useState("detalhes");
+
+  const relatedMoviesRaw = movies.filter((m) => m.title === movie.title && m.id !== movie.id);
 
   return (
-    <>
-      {/* Overlay */}
-      <div
-        className="fixed inset-0 bg-black bg-opacity-50 z-40"
-        onClick={onClose}
-      />
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+      onClick={onClose}
+    >
 
-      {/* Modal */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-auto">
+      <div className="fixed inset-0 flex justify-center items-center z-50 p-4 overflow-auto">
         <div
-          className="bg-white rounded-lg shadow-lg max-w-3xl w-full max-h-full overflow-y-auto p-5 relative"
+          className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-4 relative"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Fechar */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 text-gray-600 hover:text-gray-900 text-2xl font-bold"
-            aria-label="Fechar"
+            className="absolute top-2 right-4 text-gray-600 hover:text-black text-2xl font-bold"
           >
             &times;
           </button>
 
-          <div className="grid grid-cols-1 md:grid-cols-[auto,1fr] gap-6">
-            {/* Capa */}
-            {mainMovie.img && (
+          <div className="mb-4 flex space-x-4 border-b pb-2">
+            <button
+              className={`px-3 py-1 font-semibold rounded ${activeTab === "detalhes" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-800"}`}
+              onClick={() => setActiveTab("detalhes")}
+            >
+              Detalhes
+            </button>
+            <button
+              className={`px-3 py-1 font-semibold rounded ${activeTab === "elenco" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-800"}`}
+              onClick={() => setActiveTab("elenco")}
+            >
+              Elenco e equipe
+            </button>
+            {relatedMoviesRaw.length > 0 && (
+              <button
+                className={`px-3 py-1 font-semibold rounded ${activeTab === "relacionados" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-800"}`}
+                onClick={() => setActiveTab("relacionados")}
+              >
+                Filmes Relacionados
+              </button>
+            )}
+          </div>
+
+          {activeTab === "detalhes" && (
+            <div className="grid grid-cols-1 md:grid-cols-[auto,1fr] gap-6">
+              {/* Capa */}
               <div className="w-full md:w-48 aspect-[2/3] rounded overflow-hidden flex-shrink-0">
                 <img
-                  src={mainMovie.img}
-                  alt={mainMovie.title}
+                  src={getSanitizedImage(movie)}
+                  alt={movie.title}
                   className="w-full h-full object-cover"
                 />
               </div>
-            )}
 
-            {/* Conteúdo */}
-            <div className="space-y-3">
-              <h2 className="text-2xl font-bold text-gray-800">{mainMovie.title}</h2>
-              {mainMovie.original_title && (
-                <p className="italic text-gray-500">{mainMovie.original_title}</p>
-              )}
-              <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-                {mainMovie.synopsis}
-              </p>
+              {/* Conteúdo */}
+              <div className="space-y-4">
+                <h2 className="text-xl font-bold mb-2 text-gray-800">{movie.title}</h2>
+                {movie.original_title && (
+                  <p className="italic text-sm text-gray-600 mb-2">
+                    {movie.original_title}
+                  </p>
+                )}
 
-              {/* Nova seção de notas */}
-              {mainMovie?.notes && (
-                <div className="bg-gray-50 border border-gray-200 rounded p-3 text-sm text-gray-600 whitespace-pre-line">
-                  <strong>Notas:</strong>
-                  <p className="mt-1">{mainMovie.notes}</p>
+                {/* Informações Gerais */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                  <p><strong>Ano:</strong> {movie.year || "N/A"}</p>
+                  <p><strong>País(es): </strong>
+                    {movie?.countries?.split(",").map((g) => (
+                      <span
+                        key={g?.trim()}
+                        className="inline-block px-2 py-0.5 mr-1 rounded text-xs font-medium bg-blue-100 text-blue-700"
+                      >
+                        {g.trim() || "N/A"}
+                      </span>
+                    ))}
+                  </p>
+                  <p>
+                    <strong>Gênero:</strong>{" "}
+                    {movie.genre?.split(",").map((g) => (
+                      <span
+                        key={g.trim()}
+                        className={`inline-block px-2 py-0.5 mr-1 rounded text-xs font-medium ${g.toLowerCase().includes("erotic") || g.toLowerCase().includes("adult")
+                          ? "bg-red-100 text-red-700"
+                          : "bg-blue-100 text-blue-700"
+                          }`}
+                      >
+                        {g.trim()}
+                      </span>
+                    )) || "N/A"}
+                  </p>
                 </div>
-              )}
 
-              {/* Informações Gerais */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
-                <p><strong>Ano:</strong> {mainMovie.year || "N/A"}</p>
-                <p><strong>Países:</strong> {mainMovie.countries || "N/A"}</p>
-                <p>
-                  <strong>Gênero:</strong>{" "}
-                  {mainMovie.genre?.split(",").map((g) => (
-                    <span
-                      key={g.trim()}
-                      className={`inline-block px-2 py-0.5 mr-1 rounded text-xs font-medium ${g.toLowerCase().includes("erotic") || g.toLowerCase().includes("adult")
-                        ? "bg-red-100 text-red-700"
-                        : "bg-blue-100 text-blue-700"
-                        }`}
-                    >
-                      {g.trim()}
-                    </span>
-                  )) || "N/A"}
-                </p>
-                <p>
-                  <strong>Possuído:</strong>{" "}
-                  {mainMovie.owned ? (
-                    <span className="text-green-600 font-semibold">Sim</span>
-                  ) : (
-                    <span className="text-gray-500">Não</span>
-                  )}
-                </p>
-                <p>
-                  <strong>Assistido:</strong>{" "}
-                  {mainMovie.watched === "W" ? (
-                    <span className="text-green-600 font-semibold">Sim</span>
-                  ) : (
-                    <span className="text-gray-500">Não</span>
-                  )}
-                </p>
+                <ControlStatusComponent
+                  data={movie}
+                  status={{
+                    emoji: "👁️‍🗨️",
+                    condicoes: {
+                      completo: movie.watched === "W",
+                      pacialmente: movie.watched === "P"
+                    },
+                    labels: {
+                      incompleto: "Não assistido",
+                      completo: "Assistido",
+                      pacialmente: "Parcialmente assistido",
+                    }
+
+                  }}
+                />
+
+                {movie.synopsis && (
+                  <div className="mb-4">
+                    <h4 className="text-sm font-semibold text-gray-800 mb-1">Sinopse</h4>
+                    <p className="text-sm text-gray-700 whitespace-pre-line bg-gray-50 p-3 rounded-md border max-h-40 overflow-y-auto">
+                      {movie.synopsis}
+                    </p>
+                  </div>
+                )}
+
+                {movie?.notes && (
+                  <div className="bg-gray-50 border border-gray-200 rounded p-3 text-sm text-gray-600 whitespace-pre-line">
+                    <strong>Notas:</strong>
+                    <p className="mt-1">{movie.notes}</p>
+                  </div>
+                )}
               </div>
+            </div>
+          )}
 
+          {activeTab === "elenco" && (
+            <>
               {/* Cast e Direção do TMDb */}
-              {(movie.cast?.length || movie.crew?.length) && (
+              {(movie?.cast?.length || movie?.crew?.length) && (
                 <div className="mt-6">
                   {movie.crew?.length > 0 && (
                     <>
@@ -154,12 +190,46 @@ function MovieModal({ movie, onClose }) {
                   )}
                 </div>
               )}
+            </>
+          )}
 
-            </div>
-          </div>
+          {activeTab === "relacionados" && (
+            <>
+              {relatedMoviesRaw.length > 0 && (
+                <div className="mt-6">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 overflow-y-auto">
+                    {relatedMoviesRaw?.map((relMovie) => (
+                      <div
+                        key={relMovie.id}
+                        className="cursor-pointer border rounded p-2 hover:shadow-md flex items-center gap-2 bg-white"
+                        onClick={() => {
+                          setActiveTab("detalhes")
+                          onSelectRelated(relMovie);
+                        }}
+                      >
+                        <img
+                          src={getSanitizedImage(relMovie)}
+                          alt={relMovie.title}
+                          className="w-14 h-20 object-cover rounded shadow-sm"
+                        />
+                        <div className="flex flex-col text-sm overflow-hidden">
+                          <span className="font-semibold truncate">
+                            {getValueOrDafault(relMovie.subtitle, relMovie.title)}
+                          </span>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 italic">
+                            {relMovie.year || "N/A"}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
         </div>
-      </div>
-    </>
+      </div >
+    </div >
   );
 }
 
@@ -229,6 +299,10 @@ export default function Filmes() {
       setLoadingTmdb(false);
     }
   }
+
+  const handleSelectRelated = (movie) => {
+    handleOpenModal(movie);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white p-4 md:p-6">
@@ -344,13 +418,90 @@ export default function Filmes() {
           )}
         </div>
       </div>
+
+      {/* List view */}
+      {viewMode === "list" && (
+        <div className="space-y-3">
+          {paginated.map((movie) => {
+            const imageSrc = getSanitizedImage(movie);
+
+            return (
+              <div
+                key={movie.id}
+                className="flex items-center gap-4 bg-white p-3 rounded-lg shadow hover:shadow-lg cursor-pointer"
+                onClick={() => handleOpenModal(movie)}
+              >
+                <img
+                  src={imageSrc}
+                  alt={movie.title}
+                  className="w-20 h-28 object-cover rounded-md border border-gray-300 flex-shrink-0"
+                />
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg font-semibold text-gray-900 truncate">
+                    {movie?.subtitle || movie?.title}
+                  </h3>
+                  {!isNullOrEmpty(movie?.subtitle) && (
+                    <p className="text-xs text-gray-500 dark:text-gray-400 italic">{movie.title}</p>
+                  )}
+
+                  <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                    {movie.year && (
+                      <span>
+                        <strong>Ano:</strong> {movie.year}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-3 mt-1 text-sm text-gray-700">
+                    {movie.genre && (
+                      <span>
+                        Gênero: {movie.genre?.split(",").map((g) => (
+                          <span
+                            key={g.trim()}
+                            className={`inline-block px-2 py-0.5 mr-1 rounded text-xs font-medium ${g.toLowerCase().includes("erotic") || g.toLowerCase().includes("adult")
+                              ? "bg-red-100 text-red-700"
+                              : "bg-blue-100 text-blue-700"
+                              }`}
+                          >
+                            {g.trim()}
+                          </span>
+                        )) || "N/A"}
+                      </span>
+                    )}
+                  </div>
+
+                  <ControlStatusComponent
+                    data={movie}
+                    status={{
+                      emoji: "👁️‍🗨️",
+                      condicoes: {
+                        completo: movie.watched === "W",
+                        pacialmente: movie.watched === "P"
+                      },
+                      labels: {
+                        incompleto: "Não assistido",
+                        completo: "Assistido",
+                        pacialmente: "Parcialmente assistido",
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}
         onPageChange={(page) => setCurrentPage(page)} />
 
       {/* Modal */}
-      <MovieModal movie={selectedMovie} onClose={() => setSelectedMovie(null)} />
+      <MovieModal
+        movie={selectedMovie}
+        movies={movies}
+        onClose={() => setSelectedMovie(null)}
+        onSelectRelated={handleSelectRelated} />
     </div>
   );
 }

@@ -7,30 +7,18 @@ import { FilterSheets } from "../components/FilterSheets";
 import { Pagination } from "../components/Pagination";
 import { DataContext } from "../context/DataContext";
 import { CATEGORY_ANIMES, CATEGORY_TV_SHOWS, CATEGORY_TV_TOKUSATSU, SHEET_ANIMES, SHEET_SERIES, SHEET_TV_SHOWS, SHEET_TV_TOKUSATSU } from "../utils/constantes";
-import { getOwnedList, getSanitizedImage, isNotNullOrEmpty, isNullOrEmpty, isOwned } from "../utils/utils";
+import { getOwnedList, getSanitizedImage, isNotNullOrEmpty, isNullOrEmpty, isFlagTrue } from "../utils/utils";
 
-// Função descrita acima
-function getUniqueGenres(data) {
-  const allGenres = data.flatMap((item) => {
-    if (!item.genre) return [];
-    return item.genre
-      .split(",")
-      .map((g) => g.trim())
-      .filter((g) => g.length > 0);
-  });
-  // Remove duplicatas e ordenar alfabeticamente
-  return Array.from(new Set(allGenres)).sort((a, b) => a.localeCompare(b));
-}
 function getTotalEpisodes(episodesString) {
   if (typeof episodesString === 'string') {
     const [, total] = episodesString?.split("|").map(s => s.trim());
-    return Number(total) || 0;
+    return Number(total) || episodesString;
   }
   return episodesString;
 }
 
 // Modal Component
-function TvSeriesModal({ data, onClose }) {
+function Modal({ data, onClose }) {
   if (!data || !Array.isArray(data)) return null;
 
   const mainSeries = data.find((item) => isNullOrEmpty(item.season));
@@ -84,11 +72,13 @@ function TvSeriesModal({ data, onClose }) {
               )}
 
               <div className="space-y-4">
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold">
+                <h2 className="text-xl font-bold mb-2 text-gray-800">
                   {mainSeries?.title}
                 </h2>
                 {isNotNullOrEmpty(mainSeries?.original_title) && (
-                  <p className="italic text-gray-500">{mainSeries?.original_title}</p>
+                  <p className="italic text-sm text-gray-600 mb-2">
+                    {mainSeries?.original_title}
+                  </p>
                 )}
                 <p className="text-gray-700 leading-relaxed">
                   {mainSeries?.synopsis}
@@ -118,7 +108,7 @@ function TvSeriesModal({ data, onClose }) {
                   </p>
                   <p>
                     <strong>Possuído:</strong>{" "}
-                    {isOwned(mainSeries?.owned) ? (
+                    {isFlagTrue(mainSeries?.owned) ? (
                       <span className="text-blue-600 font-semibold">Sim</span>
                     ) : (
                       "Não"
@@ -133,6 +123,7 @@ function TvSeriesModal({ data, onClose }) {
             <div className="space-y-4 max-h-[75vh] overflow-y-auto pr-1">
               {seasons.map((season) => {
                 const totalEpisodes = getTotalEpisodes(season.episodes);
+
                 return (
                   <div key={season.id} className="border rounded-md p-3 bg-gray-50">
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2">
@@ -150,7 +141,7 @@ function TvSeriesModal({ data, onClose }) {
 
                     <div className="text-sm mb-2">
                       <p><strong>Tipo:</strong> {season.type || "TV Show"}</p>
-                      <p><strong>Possuído:</strong> {isOwned(season.owned) ? "Sim" : "Não"}</p>
+                      <p><strong>Possuído:</strong> {isFlagTrue(season.owned) ? "Sim" : "Não"}</p>
                     </div>
 
                     <div>
@@ -257,6 +248,7 @@ export default function Series() {
     }, {});
 
     for (const [title, seasons] of Object.entries(grouped)) {
+      
       const validSeasons = seasons.filter(
         (item) => !isNullOrEmpty(item.season) && !isNullOrEmpty(item.year)
       );
@@ -271,11 +263,11 @@ export default function Series() {
         map[title] = false;
         continue;
       }
-
+ 
       const latestYear = Math.max(...validSeasons.map((s) => s.year));
-      const latestSeasonEpisodes = validSeasons.filter((s) => s.year === latestYear);
+      const latestSeasonEpisodes = validSeasons.filter((s) => Number(s.year) === latestYear);
 
-      map[title] = latestSeasonEpisodes.some((ep) => ep.watched !== "P");
+      map[title] = latestSeasonEpisodes.some((ep) => ep.watched !== "W");
     }
 
     return map;
@@ -287,22 +279,24 @@ export default function Series() {
     return seasons.length > 0 && seasons.every((item) => item.watched === "W");
   };
 
+  const checkStatusSeasonsWatched = (title) => {
+    const seasons = series.filter((item) => item.title === title && !isNullOrEmpty(item.season));
+    if (seasons.length === 0) return 'NOTW'; // se não tem temporadas, não considera "tudo assistido"
+
+    if (seasons.every((item) => item.watched === "W")) return "W";
+    if (seasons.some((item) => item.watched === "P" || item.watched === "W")) return "P";
+
+    return "NOTW";
+  };
+
   const checkAllSeasonsOwned = (title) => {
     const seasons = series.filter((item) => item.title === title && !isNullOrEmpty(item.season));
     if (seasons.length === 0) return false; // sem temporadas, não considera "tudo owned"
-    return seasons.length > 0 && seasons.every((item) => item.owned === true);
+    return seasons.length > 0 && seasons.every((item) => item.owned === 'TRUE');
   };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white p-4 md:p-6">
-      {/* Exibe total de séries de forma moderna */}
-      <div className="flex justify-center mb-6">
-        <div className="inline-flex items-center bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
-          <TvIcon className="w-4 h-4 mr-1" />
-          <span>{totalCount} Séries</span>
-        </div>
-      </div>
-
       <FilterSheets
         dataSheets={series}
         onFilter={setFilteredSeries}
@@ -355,7 +349,6 @@ export default function Series() {
         <div className="flex justify-between items-center mb-4">
           {/* Grid view */}
           {viewMode === "grid" && (
-
             <div ref={gridRef} className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-5">
               {paginatedSeries.map((s) => {
                 const main = series.find((item) => item.title === s.title && isNullOrEmpty(item.season)) || s;
@@ -387,8 +380,8 @@ export default function Series() {
                       </span>
                     )}
 
-                    {newSeasonMap[main.title] && (
-                      <div className="absolute top-2 left-2 bg-red-600 text-white text-xs font-semibold rounded px-2 py-0.5 shadow-lg select-none">
+                    {newSeasonMap[main.title] === true && (
+                      <div className="absolute top-2 left-2 bg-red-600 text-white text-xs font-semibold rounded px-2 py-0.5 rounded shadow-md z-10">
                         Novas
                       </div>
                     )}
@@ -401,7 +394,6 @@ export default function Series() {
                         loading="lazy"
                         draggable={false}
                       />
-
                     </div>
 
                     <div className="p-2 flex-grow flex flex-col justify-between">
@@ -423,6 +415,91 @@ export default function Series() {
         </div>
       </div>
 
+      {/* List view */}
+      {viewMode === "list" && (
+        <div className="space-y-3">
+          {paginatedSeries.map((s) => {
+            const main = series.find((item) => item.title === s.title && isNullOrEmpty(item.season)) || s;
+
+            const allWatched = checkStatusSeasonsWatched(s.title);
+            const allOwned = checkAllSeasonsOwned(s.title);
+            const imageSrc = getSanitizedImage(main);
+
+            return (
+              <div
+                key={main.id}
+                className="flex items-center gap-4 bg-white p-3 rounded-lg shadow hover:shadow-lg cursor-pointer"
+                onClick={() => setSelectedSeries(groupByTitle(s.title))}
+              >
+                <img
+                  src={imageSrc}
+                  alt={main.title}
+                  className="w-20 h-28 object-cover rounded-md border border-gray-300 flex-shrink-0"
+                />
+                <div className="flex-1 min-w-0">
+
+                  <h3 className="text-lg font-semibold text-gray-900 truncate">
+                    {main.title}
+                  </h3>
+
+                  <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                    {main.year && (
+                      <span>
+                        <strong>Ano:</strong> {main.year}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-3 mt-1 text-sm text-gray-700">
+                    {main.genre && (
+                      <span>
+                        Gênero: {main.genre?.split(",").map((g) => (
+                          <span
+                            key={g.trim()}
+                            className={`inline-block px-2 py-0.5 mr-1 rounded text-xs font-medium ${g.toLowerCase().includes("erotic") || g.toLowerCase().includes("adult")
+                              ? "bg-red-100 text-red-700"
+                              : "bg-blue-100 text-blue-700"
+                              }`}
+                          >
+                            {g.trim()}
+                          </span>
+                        )) || "N/A"}
+                      </span>
+                    )}
+                  </div>
+                  <div className="mt-2 grid gap-2 sm:grid-cols-2 text-sm">
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1 bg-green-50 text-green-700 px-3 py-1 rounded-full shadow-sm">
+                        <span className="text-base">🗂️</span>
+                        <span className="font-semibold">Na coleção:</span>
+                        <span>{allOwned ? "Sim" : "Não"}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className={`flex items-center gap-1 px-3 py-1 rounded-full shadow-sm ${allWatched === "W"
+                        ? "bg-blue-50 text-blue-700"
+                        : allWatched === "P"
+                          ? "bg-yellow-50 text-yellow-700"
+                          : "bg-red-50 text-red-700"
+                        }`}>
+                        <span className="text-base">👁️‍🗨️</span>
+                        <span className="font-semibold">Status:</span>
+                        <span>
+                          {allWatched === "W"
+                            ? "Assistido"
+                            : allWatched === "P"
+                              ? "Parcialmente assistido"
+                              : "Não assistido"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}
@@ -430,7 +507,7 @@ export default function Series() {
       />
 
       {selectedSeries && (
-        <TvSeriesModal
+        <Modal
           data={selectedSeries}
           onClose={() => setSelectedSeries(null)}
         />

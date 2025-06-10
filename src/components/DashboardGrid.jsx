@@ -28,7 +28,7 @@ export default function DashboardGrid({ panels }) {
       {/* Grid de painéis */}
       <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-1 gap-6">
         {filteredPanels.map(({ key, title, slug, data }) => (
-          <div key={key} className="min-h-[300px] flex flex-col">
+          <div key={`${key}-${title}`} className="min-h-[300px] flex flex-col">
             <p className="text-gray-500 text-sm">{title}</p>
             {slug && data && (
               <p className="text-xs text-gray-400">({data.length} itens)</p>

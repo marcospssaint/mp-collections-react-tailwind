@@ -14,10 +14,6 @@ export function useLoadSheets(sheetNames) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-  console.log("🔄 useLoadSheets chamado:", sheetNames);
-}, [sheetNames]);
-
-  useEffect(() => {
     let isCancelled = false;
 
     async function fetchAll() {
@@ -26,7 +22,6 @@ export function useLoadSheets(sheetNames) {
 
       for (const sheet of sheetNames) {
         try {
-          console.log('sheet ', sheet)
           const data = await fetchSheetData({ sheetName: sheet });
           if (!isCancelled) {
             setSheetData(sheet, data);

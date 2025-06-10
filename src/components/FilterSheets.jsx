@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import FilterSheetsUI from "./FilterSheetsUI";
+import { isFlagTrue } from "../utils/utils";
 
 export function FilterSheets({ dataSheets, onFilter, estatisticas, categoriesOptions = [], categoryDefault }) {
   const [selectedGenre, setSelectedGenre] = useState("");
@@ -40,7 +41,7 @@ export function FilterSheets({ dataSheets, onFilter, estatisticas, categoriesOpt
       const matchesYear = selectedYear ? m.year?.toString() === selectedYear : true;
       const matchesCategory = selectedCategory ? m?.category === selectedCategory : true;
       const matchesWatched = showWatched ? m.watched === "W" : true;
-      const matchesOwned = showOwned ? m.owned : true;
+      const matchesOwned = showOwned ? isFlagTrue(m.owned) : true;
       const matchesAdult = showAdult
         ? m.genre?.toLowerCase().includes("adult") || m.genre?.toLowerCase().includes("erotic")
         : !(
