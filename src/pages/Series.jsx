@@ -38,7 +38,7 @@ const SeasonAccordion = ({ seasons }) => {
               className="w-full text-left px-4 py-3 flex flex-col sm:flex-row sm:justify-between sm:items-center hover:bg-gray-100 transition"
             >
               <h4 className="text-lg font-semibold">
-                {(season.type === "OVA" || season.type === "Movie") && (
+                {(season.type === "OVA" || season.type === "Special" || season.type === "Movie") && (
                   <>
                     {getValueOrDafault(season.subtitle, season.original_title)} (
                     <strong className="text-sm text-gray-600">{season?.year}</strong>) - {season.type}
@@ -243,12 +243,22 @@ export default function Series() {
   const gridRef = useRef(null);
 
   useEffect(() => {
+    setFilteredSeries(seriesC);
+  }, [seriesC]); // This effect runs whenever 'seriesC' changes
+
+  useEffect(() => {
     setCurrentPage(1);
   }, []);
 
   useEffect(() => {
-    setFilteredSeries(seriesC);
-  }, [seriesC]); // This effect runs whenever 'seriesC' changes
+    // Ao mudar a página, rolar para o topo do grid
+    if (gridRef.current) {
+      gridRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    } else {
+      // fallback para rolar a página toda até o topo
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [currentPage]);
 
   const isAdultGenre = (genre = "") =>
     genre.toLowerCase().includes("adult") || genre.toLowerCase().includes("erotic");
