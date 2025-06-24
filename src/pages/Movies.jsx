@@ -5,6 +5,7 @@ import { FilterSheets } from "../components/FilterSheets";
 import { Pagination } from "../components/Pagination";
 import { DataContext } from "../context/DataContext";
 import { fetchCastAndCrew, fetchTmdbMovieId, getSanitizedImage, getValueOrDafault } from "../utils/utils";
+import { useNavigate } from 'react-router-dom';
 
 function MovieModal({ movie, movies, onClose, onSelectRelated }) {
   if (!movie) return null;
@@ -235,7 +236,17 @@ export default function Filmes() {
   const ITEMS_PER_PAGE = 24;
 
   const { dataSheets } = useContext(DataContext);
-  const movies = dataSheets[SHEET_NAME] || []
+  
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Verifica se dataSheets está vazio
+    if (!dataSheets || Object.keys(dataSheets).length === 0) {
+      navigate("/home", { replace: true });
+    }
+  }, [dataSheets, navigate]);
+
+  const movies = dataSheets[SHEET_NAME] || [];
 
   const [filteredMovies, setFilteredMovies] = useState(movies);
   const [selectedMovie, setSelectedMovie] = useState(null);
@@ -359,10 +370,8 @@ export default function Filmes() {
 
       <div className="p-4 max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-4">
-
           {/* Grid view */}
           {viewMode === "grid" && (
-
             <div ref={gridRef} className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-5">
               {paginated.map((movie) => {
                 const imageSrc = getSanitizedImage(movie);
@@ -424,7 +433,7 @@ export default function Filmes() {
 
             return (
               <div
-                key={movie.id}
+                key={`${movie.title}-${movie.id}-list`}
                 className="flex items-center gap-4 bg-white p-3 rounded-lg shadow hover:shadow-lg cursor-pointer"
                 onClick={() => handleOpenModal(movie)}
               >

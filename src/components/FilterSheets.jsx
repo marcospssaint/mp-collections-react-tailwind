@@ -2,7 +2,15 @@ import { useEffect, useState } from "react";
 import FilterSheetsUI from "./FilterSheetsUI";
 import { isFlagTrue } from "../utils/utils";
 
-export function FilterSheets({ dataSheets, onFilter, estatisticas, categoriesOptions = [], categoryDefault }) {
+export function FilterSheets({
+    dataSheets,
+    dataSheetsGroup,
+    onFilter,
+    estatisticas,
+    categoriesOptions = [],
+    categoryDefault,
+    sortByDefault = 'year-desc'
+   }) {
   const [selectedGenre, setSelectedGenre] = useState("");
   const [selectedCountry, setSelectedCountry] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
@@ -11,7 +19,7 @@ export function FilterSheets({ dataSheets, onFilter, estatisticas, categoriesOpt
   const [showOwned, setShowOwned] = useState(false);
   const [showAdult, setShowAdult] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState("year-desc");
+  const [sortBy, setSortBy] = useState(sortByDefault);
 
   const genres = Array.from(
     new Set(dataSheets.flatMap((m) => m.genre?.split(",").map((g) => g.trim()) ?? []))
@@ -68,17 +76,25 @@ export function FilterSheets({ dataSheets, onFilter, estatisticas, categoriesOpt
       );
     });
 
-    if (sortBy === "title-asc") {
-      filtered = [...filtered].sort((a, b) => a.title.localeCompare(b.title));
-    } else if (sortBy === "title-desc") {
-      filtered = [...filtered].sort((a, b) => b.title.localeCompare(a.title));
-    } else if (sortBy === "year-desc") {
-      filtered = [...filtered].sort((a, b) => (b.year || 0) - (a.year || 0));
-    } else if (sortBy === "year-asc") {
-      filtered = [...filtered].sort((a, b) => (a.year || 0) - (b.year || 0));
+    let finalList = filtered;
+
+    if (dataSheetsGroup !== undefined) {
+      finalList = dataSheetsGroup.filter((f) =>
+        filtered.some((g) => g.title === f.title)
+      );
     }
 
-    onFilter(filtered);
+    if (sortBy === "title-asc") {
+      finalList = [...finalList].sort((a, b) => a.title.localeCompare(b.title));
+    } else if (sortBy === "title-desc") {
+      finalList = [...finalList].sort((a, b) => b.title.localeCompare(a.title));
+    } else if (sortBy === "year-desc") {
+      finalList = [...finalList].sort((a, b) => (b.year || 0) - (a.year || 0));
+    } else if (sortBy === "year-asc") {
+      finalList = [...finalList].sort((a, b) => (a.year || 0) - (b.year || 0));
+    }
+
+    onFilter(finalList);
   }, [
     selectedGenre,
     selectedCountry,

@@ -43,13 +43,13 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           } />
           <Route path="/series" element={
             <ProtectedRoute>
-                <Series />
-              </ProtectedRoute>
+              <Series />
+            </ProtectedRoute>
           } />
           <Route path="/books" element={
             <ProtectedRoute>
-                <Books />
-              </ProtectedRoute>
+              <Books />
+            </ProtectedRoute>
           } />
         </Route>
       </Routes>

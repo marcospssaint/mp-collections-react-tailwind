@@ -13,6 +13,7 @@ import {
 } from "../utils/constantes";
 import { getOwnedList, getSanitizedImage, getValueOrDafault, isNotNullOrEmpty, isNullOrEmpty, isFlagTrue } from '../utils/utils';
 import { ControlStatusComponent } from '../components/ControlStatusComponent';
+import { useNavigate } from 'react-router-dom';
 
 function getTotalVolumes(volumeString) {
   if (typeof volumeString === 'string') {
@@ -25,20 +26,22 @@ function getTotalVolumes(volumeString) {
 // VolumesStatus Component
 function VolumesStatus({ totalVolumes, readVolume }) {
   const total = getTotalVolumes(totalVolumes);
+  const totalNaColecao = getOwnedList(totalVolumes);
   return (
     <div className="space-y-2">
       <div className="flex justify-between items-center mb-2 text-sm font-semibold text-gray-700">
-        <div>Volumes na coleção: {getOwnedList(totalVolumes)} / {total}</div>
+        <div>Volumes na coleção: {totalNaColecao} / {total}</div>
         <div>Volumes lidos: {readVolume}</div>
       </div>
       <div className="grid grid-cols-8 gap-1">
         {Array.from({ length: total }).map((_, idx) => {
           const volNum = idx + 1;
           const isRead = volNum <= readVolume;
+          const isOwned = volNum <= totalNaColecao;
           return (
             <div
               key={volNum}
-              className={`w-6 h-6 text-xs flex items-center justify-center rounded ${isRead ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-400"}`}
+              className={`w-6 h-6 text-xs flex items-center justify-center rounded ${isRead ? "bg-green-500 text-white" : isOwned ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-400" }`}
               title={`Volume ${volNum} ${isRead ? "(Lido)" : ""}`}
             >
               {volNum}
@@ -316,15 +319,23 @@ export default function Books() {
   const categories = [CATEGORY_COMICS, CATEGORY_MANGAS, CATEGORY_BOOKS];
 
   const { dataSheets } = useContext(DataContext);
-  const livros = dataSheets[SHEET_LIVROS] || []
+  const navigate = useNavigate();
 
-  const livrosC = useMemo(() => {
+  useEffect(() => {
+    // Verifica se dataSheets está vazio
+    if (!dataSheets || Object.keys(dataSheets).length === 0) {
+      navigate("/home", { replace: true });
+    }
+  }, [dataSheets, navigate]);
+  
+  const livros = dataSheets[SHEET_LIVROS] || [];
+
+  const livrosComplete = useMemo(() => {
     return livros.map((l) => {
       // Se o livro NÃO for uma coleção, mas fizer parte de uma (mesmo título)
       const collectionParent = !isFlagTrue(l.collection)
         ? livros.find((c) => isFlagTrue(c.collection) && c.title === l.title)
         : null;
-
 
       // Herança reversa: se o livro for filho, herda campos do pai se não tiver
       return {
@@ -333,7 +344,7 @@ export default function Books() {
         genre: getValueOrDafault(l.genre, collectionParent?.genre),
       };
     })
-  }, [livros])
+  }, [livros]);
 
   const [filteredLivros, setFilteredLivros] = useState([]);
   const [selectedlivro, setSelectedLivro] = useState(null);
@@ -350,12 +361,12 @@ export default function Books() {
   );
 
   useEffect(() => {
-    setFilteredLivros(livrosC);
-  }, [livrosC]); // This effect runs whenever 'livrosC' changes
+    setFilteredLivros(livrosComplete);
+  }, [livrosComplete]); // This effect runs whenever 'livrosComplete' changes
 
   useEffect(() => {
     setCurrentPage(1);
-  }, []);
+  }, [filteredLivros]);
 
   useEffect(() => {
     // Ao mudar a página, rolar para o topo do grid
@@ -374,7 +385,7 @@ export default function Books() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white p-4 md:p-6">
       <FilterSheets
-        dataSheets={livrosC}
+        dataSheets={livrosComplete}
         onFilter={setFilteredLivros}
         estatisticas={{
           tipo: "livro",
@@ -390,6 +401,7 @@ export default function Books() {
         }}
         categoriesOptions={categories}
         categoryDefault={CATEGORY_COMICS}
+        sortByDefault={'title-asc'}
       />
 
       <div className="flex flex-wrap justify-between items-center mb-4 gap-4">
@@ -596,7 +608,7 @@ export default function Books() {
 
       < Modal
         livro={selectedlivro}
-        livros={livrosC}
+        livros={livrosComplete}
         onClose={() => setSelectedLivro(null)}
         onSelectRelated={handleSelectRelated}
       />
