@@ -5,7 +5,7 @@ import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { FilterSheets } from "../components/FilterSheets";
 import { Pagination } from "../components/Pagination";
 import { DataContext } from "../context/DataContext";
-import { CATEGORY_ANIMES, CATEGORY_TV_SHOWS, CATEGORY_TV_TOKUSATSU, SHEET_ANIMES, SHEET_SERIES, SHEET_TV_SHOWS, SHEET_TV_TOKUSATSU } from "../utils/constantes";
+import { CATEGORY_ANIMES, CATEGORY_TV_SHOWS, CATEGORY_TV_TOKUSATSU, SHEET_ANIMES, SHEET_SERIES, SHEET_TV_SHOWS, SHEET_TV_TOKUSATSU, STATUS_VIDEO_NOTW, STATUS_VIDEO_P, STATUS_VIDEO_W } from "../utils/constantes";
 import { getOwnedList, getSanitizedImage, isNotNullOrEmpty, isNullOrEmpty, isFlagTrue, getValueOrDafault } from "../utils/utils";
 import { ControlStatusComponent } from '../components/ControlStatusComponent';
 import { useNavigate } from 'react-router-dom';
@@ -247,6 +247,7 @@ export default function Series() {
         ...s,
         countries: getValueOrDafault(s.countries, serieParent?.countries),
         genre: getValueOrDafault(s.genre, serieParent?.genre),
+        status: getValueOrDafault(s.watched, serieParent?.watched),
       };
     })
   }, [series]);
@@ -375,6 +376,7 @@ export default function Series() {
         }}
         categoriesOptions={categories}
         categoryDefault={CATEGORY_TV_SHOWS}
+        statusOptions={[STATUS_VIDEO_NOTW, STATUS_VIDEO_W, STATUS_VIDEO_P]}
       />
 
       <div className="flex flex-wrap justify-between items-center mb-4 gap-4">
@@ -429,20 +431,20 @@ export default function Series() {
 
                     {/* +18 Badge */}
                     {isAdultGenre(main?.genre) && (
-                      <span className="absolute top-2 left-2 bg-red-700 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded shadow-md z-10">
+                      <span className="absolute top-2 left-2 bg-red-700 text-white text-[15px] font-semibold px-1.5 py-0.5 rounded shadow-md z-10">
                         +18
                       </span>
                     )}
 
                     {/* Assistido */}
                     {allWatched && (
-                      <span className="absolute top-2 right-2 bg-green-600 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded shadow-md z-10">
+                      <span className="absolute top-2 right-2 bg-green-600 text-white text-[15px] font-semibold px-1.5 py-0.5 rounded shadow-md z-10">
                         Assistido
                       </span>
                     )}
 
                     {newSeasonMap[main.title] === true && (
-                      <div className="absolute top-2 left-2 bg-red-600 text-white text-xs font-semibold rounded px-2 py-0.5 rounded shadow-md z-10">
+                      <div className="absolute top-2 left-2 bg-red-600 text-white text-[15px] font-semibold rounded px-2 py-0.5 rounded shadow-md z-10">
                         Novas
                       </div>
                     )}

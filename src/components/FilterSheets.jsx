@@ -1,25 +1,33 @@
 import { useEffect, useState } from "react";
 import FilterSheetsUI from "./FilterSheetsUI";
-import { isFlagTrue } from "../utils/utils";
+import { getValueOrDafault, isFlagTrue } from "../utils/utils";
+import { COLECAO_NAO, COLECAO_SIM, STATUS_BOOK_NOTR, STATUS_BOOK_P, STATUS_BOOK_R, STATUS_VIDEO_NOTW, STATUS_VIDEO_P, STATUS_VIDEO_W } from "../utils/constantes";
 
 export function FilterSheets({
-    dataSheets,
-    dataSheetsGroup,
-    onFilter,
-    estatisticas,
-    categoriesOptions = [],
-    categoryDefault,
-    sortByDefault = 'year-desc'
-   }) {
+  dataSheets,
+  dataSheetsGroup,
+  onFilter,
+  estatisticas,
+  categoriesOptions = [],
+  statusOptions = [],
+  categoryDefault,
+  isVisibleShowRead = false,
+  sortByDefault = 'year-desc'
+}) {
   const [selectedGenre, setSelectedGenre] = useState("");
   const [selectedCountry, setSelectedCountry] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
   const [selectedCategory, setSelectedCategory] = useState();
+  const [selectedStatus, setSelectedStatus] = useState();
+  const [selectedOwned, setSelectedOwned] = useState();
   const [showWatched, setShowWatched] = useState(false);
+  const [showRead, setShowRead] = useState(false);
   const [showOwned, setShowOwned] = useState(false);
   const [showAdult, setShowAdult] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState(sortByDefault);
+
+  const [filtered, setFiltered] = useState([]);
 
   const genres = Array.from(
     new Set(dataSheets.flatMap((m) => m.genre?.split(",").map((g) => g.trim()) ?? []))
@@ -48,8 +56,11 @@ export function FilterSheets({
       const matchesCountry = selectedCountry ? m.countries?.includes(selectedCountry) : true;
       const matchesYear = selectedYear ? m.year?.toString() === selectedYear : true;
       const matchesCategory = selectedCategory ? m?.category === selectedCategory : true;
-      const matchesWatched = showWatched ? m.watched === "W" : true;
-      const matchesOwned = showOwned ? isFlagTrue(m.owned) : true;
+      const matchesStatus = getValueStatus(selectedStatus) ? m.status === getValueStatus(selectedStatus) : true;
+      const matchesOwned = selectedOwned ? (COLECAO_SIM === selectedOwned ? m.owned === 'TRUE' : m.owned === 'FALSE') : true;
+      const matchesWatched = showWatched ? m?.watched === "W" : true;
+      const matchesRead = showRead ? m.read === "R" : true;
+      const matchesShowOwned = showOwned ? isFlagTrue(m.owned) : true;
       const matchesAdult = showAdult
         ? m.genre?.toLowerCase().includes("adult") || m.genre?.toLowerCase().includes("erotic")
         : !(
@@ -68,9 +79,12 @@ export function FilterSheets({
         matchesGenre &&
         matchesCountry &&
         matchesCategory &&
+        matchesStatus &&
+        matchesOwned &&
         matchesYear &&
         matchesWatched &&
-        matchesOwned &&
+        matchesRead &&
+        matchesShowOwned &&
         matchesAdult &&
         matchesSearch
       );
@@ -95,16 +109,20 @@ export function FilterSheets({
     }
 
     onFilter(finalList);
+    setFiltered(filtered);
   }, [
     selectedGenre,
     selectedCountry,
     selectedYear,
     selectedCategory,
+    selectedStatus,
+    selectedOwned,
     showWatched,
+    showRead,
     showOwned,
     showAdult,
     searchTerm,
-    sortBy,
+    sortBy
   ]);
 
   const activeFilters = [
@@ -112,19 +130,22 @@ export function FilterSheets({
     selectedCountry && { label: selectedCountry, onClear: () => setSelectedCountry("") },
     selectedYear && { label: selectedYear, onClear: () => setSelectedYear("") },
     selectedCategory && { label: selectedCategory, onClear: () => setSelectedCategory("") },
+    selectedStatus && { label: selectedStatus, onClear: () => setSelectedStatus("") },
+    selectedOwned && { label: selectedOwned, onClear: () => setSelectedOwned("") },
     showWatched && { label: "Assistidos", onClear: () => setShowWatched(false) },
+    showRead && { label: "Lidos", onClear: () => setShowRead(false) },
     showOwned && { label: "Na coleção", onClear: () => setShowOwned(false) },
     showAdult && { label: "+18", onClear: () => setShowAdult(false) },
     searchTerm && { label: `Busca: "${searchTerm}"`, onClear: () => setSearchTerm("") },
   ].filter(Boolean);
 
-  const totalFiltered = dataSheets.filter((m) => {
+  const totalFiltered = filtered.filter((m) => {
     const isAdult = m.genre?.toLowerCase().includes("adult") || m.genre?.toLowerCase().includes("erotic");
-    const isWatched = m.watched === "W";
     return isAdult && showAdult ? true : !isAdult;
   });
 
   const watchedCount = totalFiltered.filter((m) => m.watched === "W").length;
+  const readCount = totalFiltered.filter((m) => m.read === "R").length;
   const adultCount = totalFiltered.filter((m) =>
     m.genre?.toLowerCase().includes("adult") || m.genre?.toLowerCase().includes("erotic")
   ).length;
@@ -148,10 +169,21 @@ export function FilterSheets({
 
       selectedCategory={selectedCategory}
       categoriesOptions={categoriesOptions}
-      setsSelectedCategory={setSelectedCategory}
+      setSelectedCategory={setSelectedCategory}
+
+      selectedStatus={selectedStatus}
+      statusOptions={statusOptions}
+      setSelectedStatus={setSelectedStatus}
+
+      selectedOwned={selectedOwned}
+      ownedOptions={[COLECAO_SIM, COLECAO_NAO]}
+      setSelectedOwned={setSelectedOwned}
 
       showWatched={showWatched}
       setShowWatched={setShowWatched}
+
+      showRead={showRead}
+      setShowRead={setShowRead}
 
       setShowOwned={setShowOwned}
       showOwned={showOwned}
@@ -163,10 +195,34 @@ export function FilterSheets({
       setSortBy={setSortBy}
 
       activeFilters={activeFilters}
+      isVisibleShowRead={isVisibleShowRead}
 
-      estatisticas={renderEstatisticas({...estatisticas, assistidos: watchedCount, adultos: adultCount })}
+      estatisticas={renderEstatisticas({ ...estatisticas, assistidos: isVisibleShowRead ? readCount : watchedCount, adultos: adultCount })}
     />
   );
+}
+
+function getValueStatus(selectedStatus) {
+  if (selectedStatus == undefined) return null;
+  if (selectedStatus) {
+    switch (selectedStatus) {
+      case STATUS_BOOK_NOTR:
+        return 'NOTR'
+      case STATUS_BOOK_R:
+        return 'R'
+      case STATUS_VIDEO_NOTW:
+        return 'NOTW'
+      case STATUS_VIDEO_W:
+        return 'W'
+      case STATUS_BOOK_P:
+      case STATUS_VIDEO_P:
+        return 'P'
+    }
+  }
+}
+
+function getValueOwned(selectedOwned) {
+  return selectedOwned != undefined ? (COLECAO_SIM == selectedOwned ? true : false) : true;
 }
 
 function renderEstatisticas({

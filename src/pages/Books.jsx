@@ -9,7 +9,10 @@ import {
   CATEGORY_COMICS,
   CATEGORY_MANGAS,
   CATEGORY_BOOKS,
-  SHEET_LIVROS
+  SHEET_LIVROS,
+  STATUS_BOOK_P,
+  STATUS_BOOK_R,
+  STATUS_BOOK_NOTR
 } from "../utils/constantes";
 import { getOwnedList, getSanitizedImage, getValueOrDafault, isNotNullOrEmpty, isNullOrEmpty, isFlagTrue } from '../utils/utils';
 import { ControlStatusComponent } from '../components/ControlStatusComponent';
@@ -342,6 +345,7 @@ export default function Books() {
         ...l,
         countries: getValueOrDafault(l.countries, collectionParent?.countries),
         genre: getValueOrDafault(l.genre, collectionParent?.genre),
+        status: getValueOrDafault(l.read, collectionParent?.read)
       };
     })
   }, [livros]);
@@ -401,7 +405,9 @@ export default function Books() {
         }}
         categoriesOptions={categories}
         categoryDefault={CATEGORY_COMICS}
+        statusOptions={[STATUS_BOOK_NOTR, STATUS_BOOK_R, STATUS_BOOK_P]}
         sortByDefault={'title-asc'}
+        isVisibleShowRead={true}
       />
 
       <div className="flex flex-wrap justify-between items-center mb-4 gap-4">
@@ -449,7 +455,7 @@ export default function Books() {
 
                     {/* Lido */}
                     {livro?.read === "R" && (
-                      <span className="absolute top-2 right-2 bg-green-600 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded shadow-md z-10">
+                      <span className="absolute top-2 right-2 bg-green-600 text-white text-[15px] font-semibold px-1.5 py-0.5 rounded shadow-md z-10">
                         Lido
                       </span>
                     )}

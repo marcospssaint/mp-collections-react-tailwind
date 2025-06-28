@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import CountUp from 'react-countup';
+import { isFlagTrue } from '../utils/utils';
 
 const COLORS = ['#10B981', '#EF4444']; // Assistidos / Pendentes
 
@@ -13,7 +14,7 @@ export default function StatsPanel({ data = [], title = '🎬 Itens', slug = 'it
   const stats = useMemo(() => {
     const total = data.length;
     const watched = getCount(data, (d) => d.watched === 'W');
-    const owned = getCount(data, (d) => !!d.owned);
+    const owned = getCount(data, (d) => isFlagTrue(d.owned));
     const unwatched = total - watched;
 
     const genres = Array.from(new Set(

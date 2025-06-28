@@ -1,11 +1,12 @@
 import { ListBulletIcon, Squares2X2Icon } from '@heroicons/react/24/outline';
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { ControlStatusComponent } from "../components/ControlStatusComponent";
 import { FilterSheets } from "../components/FilterSheets";
 import { Pagination } from "../components/Pagination";
 import { DataContext } from "../context/DataContext";
 import { fetchCastAndCrew, fetchTmdbMovieId, getSanitizedImage, getValueOrDafault } from "../utils/utils";
 import { useNavigate } from 'react-router-dom';
+import { STATUS_VIDEO_NOTW, STATUS_VIDEO_P, STATUS_VIDEO_W } from '../utils/constantes';
 
 function MovieModal({ movie, movies, onClose, onSelectRelated }) {
   if (!movie) return null;
@@ -247,8 +248,12 @@ export default function Filmes() {
   }, [dataSheets, navigate]);
 
   const movies = dataSheets[SHEET_NAME] || [];
+  
+  const moviesComplete = useMemo(() => {
+      return movies.map((m) => ({ ...m, status: m.watched }))
+  }, [movies]);
 
-  const [filteredMovies, setFilteredMovies] = useState(movies);
+  const [filteredMovies, setFilteredMovies] = useState([]);
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -266,6 +271,10 @@ export default function Filmes() {
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
+
+  useEffect(() => {
+    setFilteredMovies(moviesComplete);
+  }, [moviesComplete]); // This effect runs whenever 'moviesComplete' changes
 
   useEffect(() => {
     setCurrentPage(1);
@@ -315,11 +324,11 @@ export default function Filmes() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white p-4 md:p-6">
       <FilterSheets
-        dataSheets={movies}
+        dataSheets={moviesComplete}
         onFilter={setFilteredMovies}
         estatisticas={{
           tipo: "filme",
-          total: filteredMovies.length,
+          total: filteredMovies?.length,
           emojis: {
             total: "🎬",
             assistidos: "👁️‍🗨️",
@@ -329,6 +338,7 @@ export default function Filmes() {
             assistidos: "assistidos"
           }
         }}
+        statusOptions={[STATUS_VIDEO_NOTW, STATUS_VIDEO_W, STATUS_VIDEO_P]}
       />
 
       <div className="flex flex-wrap justify-between items-center mb-4 gap-4">
@@ -386,14 +396,14 @@ export default function Filmes() {
                   >
                     {/* +18 Badge */}
                     {isAdultGenre(movie?.genre) && (
-                      <span className="absolute top-2 left-2 bg-red-700 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded shadow-md z-10">
+                      <span className="absolute top-2 left-2 bg-red-700 text-white text-[15px] font-semibold px-1.5 py-0.5 rounded shadow-md z-10">
                         +18
                       </span>
                     )}
 
                     {/* Assistido */}
                     {movie?.watched === "W" && (
-                      <span className="absolute top-2 right-2 bg-green-600 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded shadow-md z-10">
+                      <span className="absolute top-2 right-2 bg-green-600 text-white text-[15px] font-semibold px-1.5 py-0.5 rounded shadow-md z-10">
                         Assistido
                       </span>
                     )}

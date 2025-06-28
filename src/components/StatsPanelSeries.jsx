@@ -8,6 +8,7 @@ import {
     CATEGORY_TV_SHOWS,
     CATEGORY_TV_TOKUSATSU
 } from "../utils/constantes";
+import { isNullOrEmpty } from '../utils/utils';
 
 const COLORS = ['#10B981', '#EF4444']; // Assistidos / Pendentes
 
@@ -27,7 +28,7 @@ export default function StatsPanelSeries({ data = [] }) {
   const statsByCategory = useMemo(() => {
     return categories.map(({ key, label }) => {
       const items = data.filter((d) => d.category === key);
-      const total = items.length;
+      const total = items.filter((item) => isNullOrEmpty(item.season)).length;
       const watched = getCount(items, (d) => d.watched === 'W');
       const unwatched = total - watched;
 

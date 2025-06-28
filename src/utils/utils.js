@@ -131,7 +131,7 @@ export function isNotNullOrEmpty(value) {
 }
 
 export function isNullOrEmpty(value) {
-  return value == null || String(value).trim() === '';
+  return value == undefined || value == null || String(value).trim() === '';
 }
 
 export function getSanitizedImage(value) {

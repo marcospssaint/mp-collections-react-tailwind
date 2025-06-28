@@ -6,12 +6,16 @@ export default function FilterSheetsUI({
     selectedGenre, setSelectedGenre, genreOptions,
     selectedCountry, setSelectedCountry, countriesOptions,
     selectedYear, yearsOptions, setSelectedYear,
-    selectedCategory, categoriesOptions, setsSelectedCategory,
+    selectedCategory, categoriesOptions, setSelectedCategory,
+    selectedStatus, statusOptions, setSelectedStatus,
+    selectedOwned, ownedOptions, setSelectedOwned,
     showWatched, setShowWatched,
+    showRead, setShowRead,
     showOwned, setShowOwned,
     showAdult, setShowAdult,
     sortBy, setSortBy,
     activeFilters,
+    isVisibleShowRead,
     estatisticas
 }) {
     const renderSelectBox = (label, value, onChange, options) => (
@@ -26,9 +30,9 @@ export default function FilterSheetsUI({
                 className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 mb-6 space-y-6"
             >
                 {/* Linha de Filtros Principais */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-7 gap-7">
                     <Input label="Buscar título" value={searchTerm} onChange={setSearchTerm} />
-                    {renderSelectBox("Categoria", selectedCategory, setsSelectedCategory, categoriesOptions)}
+                    {renderSelectBox("Categoria", selectedCategory, setSelectedCategory, categoriesOptions)}
                     {renderSelectBox("Gênero", selectedGenre, setSelectedGenre, genreOptions)}
                     <div className="md:col-span-1 sm:col-span-1 col-span-1">
                         {renderSelectBox("País", selectedCountry, setSelectedCountry, countriesOptions)}
@@ -36,11 +40,18 @@ export default function FilterSheetsUI({
                     <div className="md:col-span-1 sm:col-span-1 col-span-1">
                         {renderSelectBox("Ano", selectedYear, setSelectedYear, yearsOptions)}
                     </div>
+                    <div className="md:col-span-1 sm:col-span-1 col-span-1">
+                        {renderSelectBox("Status", selectedStatus, setSelectedStatus, statusOptions)}
+                    </div>
+                    <div className="md:col-span-1 sm:col-span-1 col-span-1">
+                        {renderSelectBox("Na Coleção", selectedOwned, setSelectedOwned, ownedOptions)}
+                    </div>
                 </div>
 
                 {/* Toggles e Ordenação */}
                 <div className="flex flex-wrap items-center gap-4 mt-2">
-                    <Toggle checked={showWatched} onChange={setShowWatched} label="Assistidos" />
+                    {!isVisibleShowRead && <Toggle checked={showWatched} onChange={setShowWatched} label="Assistidos" />}
+                    {isVisibleShowRead && <Toggle checked={showRead} onChange={setShowRead} label="Lidos" />}
                     <Toggle checked={showOwned} onChange={setShowOwned} label="Na coleção" />
                     <Toggle checked={showAdult} onChange={setShowAdult} label="Mostrar +18" />
 
