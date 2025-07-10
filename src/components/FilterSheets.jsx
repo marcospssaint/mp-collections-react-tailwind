@@ -68,7 +68,7 @@ export function FilterSheets({
           m.genre?.toLowerCase().includes("erotic")
         );
       const matchesSearch = searchTerm
-        ? [m.title, m.original_title, m.subtitle, m.publication_title, m.cast, m.authors]
+        ? [m.title, m.original_title, m.subtitle, m.publication_title, m.publisher, m.cast, m.authors]
           .filter(Boolean) // remove campos null/undefined/vazios
           .join(" ")
           .toLowerCase()
