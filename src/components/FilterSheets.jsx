@@ -17,6 +17,7 @@ export function FilterSheets({
   const [selectedGenre, setSelectedGenre] = useState("");
   const [selectedCountry, setSelectedCountry] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
+  const [selectedLanguage, setSelectedLanguage] = useState("");
   const [selectedCategory, setSelectedCategory] = useState();
   const [selectedStatus, setSelectedStatus] = useState();
   const [selectedOwned, setSelectedOwned] = useState();
@@ -46,6 +47,10 @@ export function FilterSheets({
     }).filter(Boolean))
   ).sort((a, b) => b - a);
 
+  const languages = Array.from(
+    new Set(dataSheets.flatMap((m) => m.language?.split(",").map((c) => c.trim()) ?? []))
+  ).sort();
+
   useEffect(() => {
     setSelectedCategory(categoryDefault)
   }, [])
@@ -55,6 +60,7 @@ export function FilterSheets({
       const matchesGenre = selectedGenre ? m.genre?.includes(selectedGenre) : true;
       const matchesCountry = selectedCountry ? m.countries?.includes(selectedCountry) : true;
       const matchesYear = selectedYear ? m.year?.toString() === selectedYear : true;
+      const matchesLanguage = selectedLanguage ? m.language?.includes(selectedLanguage) : true;
       const matchesCategory = selectedCategory ? m?.category === selectedCategory : true;
       const matchesStatus = getValueStatus(selectedStatus) ? m.status === getValueStatus(selectedStatus) : true;
       const matchesOwned = selectedOwned ? (COLECAO_SIM === selectedOwned ? m.owned === 'TRUE' : m.owned === 'FALSE') : true;
@@ -82,6 +88,7 @@ export function FilterSheets({
         matchesStatus &&
         matchesOwned &&
         matchesYear &&
+        matchesLanguage &&
         matchesWatched &&
         matchesRead &&
         matchesShowOwned &&
@@ -114,6 +121,7 @@ export function FilterSheets({
     selectedGenre,
     selectedCountry,
     selectedYear,
+    selectedLanguage,
     selectedCategory,
     selectedStatus,
     selectedOwned,
@@ -129,6 +137,7 @@ export function FilterSheets({
     selectedGenre && { label: selectedGenre, onClear: () => setSelectedGenre("") },
     selectedCountry && { label: selectedCountry, onClear: () => setSelectedCountry("") },
     selectedYear && { label: selectedYear, onClear: () => setSelectedYear("") },
+    selectedLanguage && { label: selectedLanguage, onClear: () => setSelectedLanguage("") },
     selectedCategory && { label: selectedCategory, onClear: () => setSelectedCategory("") },
     selectedStatus && { label: selectedStatus, onClear: () => setSelectedStatus("") },
     selectedOwned && { label: selectedOwned, onClear: () => setSelectedOwned("") },
@@ -166,6 +175,10 @@ export function FilterSheets({
       selectedYear={selectedYear}
       yearsOptions={years}
       setSelectedYear={setSelectedYear}
+
+      selectedLanguage={selectedLanguage}
+      languagesOptions={languages}
+      setSelectedLanguage={setSelectedLanguage}
 
       selectedCategory={selectedCategory}
       categoriesOptions={categoriesOptions}

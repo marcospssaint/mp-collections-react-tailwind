@@ -6,7 +6,9 @@ export default function FilterSheetsUI({
     selectedGenre, setSelectedGenre, genreOptions,
     selectedCountry, setSelectedCountry, countriesOptions,
     selectedYear, yearsOptions, setSelectedYear,
+    selectedLanguage, languagesOptions, setSelectedLanguage,
     selectedCategory, categoriesOptions, setSelectedCategory,
+
     selectedStatus, statusOptions, setSelectedStatus,
     selectedOwned, ownedOptions, setSelectedOwned,
     showWatched, setShowWatched,
@@ -39,6 +41,9 @@ export default function FilterSheetsUI({
                     </div>
                     <div className="md:col-span-1 sm:col-span-1 col-span-1">
                         {renderSelectBox("Ano", selectedYear, setSelectedYear, yearsOptions)}
+                    </div>
+                    <div className="md:col-span-1 sm:col-span-1 col-span-1">
+                        {renderSelectBox("Language", selectedLanguage, setSelectedLanguage, languagesOptions)}
                     </div>
                     <div className="md:col-span-1 sm:col-span-1 col-span-1">
                         {renderSelectBox("Status", selectedStatus, setSelectedStatus, statusOptions)}

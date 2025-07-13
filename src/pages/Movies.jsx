@@ -326,6 +326,7 @@ export default function Filmes() {
       <FilterSheets
         dataSheets={moviesComplete}
         onFilter={setFilteredMovies}
+        sortByDefault={'year-desc'}
         estatisticas={{
           tipo: "filme",
           total: filteredMovies?.length,
