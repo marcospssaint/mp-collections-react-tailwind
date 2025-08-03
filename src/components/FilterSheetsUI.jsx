@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function FilterSheetsUI({
+    id,
     searchTerm, setSearchTerm,
     selectedGenre, setSelectedGenre, genreOptions,
     selectedCountry, setSelectedCountry, countriesOptions,
@@ -15,6 +16,7 @@ export default function FilterSheetsUI({
     showRead, setShowRead,
     showOwned, setShowOwned,
     showAdult, setShowAdult,
+    showAll, setShowAll,
     sortBy, setSortBy,
     activeFilters,
     isVisibleShowRead,
@@ -25,8 +27,9 @@ export default function FilterSheetsUI({
     );
 
     return (
-        <>
+        <div id={id}>
             <motion.div
+                id={id}
                 initial={{ opacity: 0, y: -15 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 mb-6 space-y-6"
@@ -59,10 +62,12 @@ export default function FilterSheetsUI({
                     {isVisibleShowRead && <Toggle checked={showRead} onChange={setShowRead} label="Lidos" />}
                     <Toggle checked={showOwned} onChange={setShowOwned} label="Na coleção" />
                     <Toggle checked={showAdult} onChange={setShowAdult} label="Mostrar +18" />
+                    <Toggle checked={showAll} onChange={setShowAll} label="Mostrar Tudo" />
 
                     <div className="ml-auto flex items-center">
                         <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mr-2">Ordenar:</label>
                         <select
+                            id={`${id}_sortby`}
                             className="border px-2 py-1 rounded bg-white dark:bg-gray-900 dark:text-white transition"
                             value={sortBy}
                             onChange={(e) => setSortBy(e.target.value)}
@@ -109,7 +114,7 @@ export default function FilterSheetsUI({
                     </div>
                 )}
             </AnimatePresence>
-        </>
+        </div>
     );
 }
 

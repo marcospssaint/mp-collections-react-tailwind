@@ -359,6 +359,7 @@ export default function Series() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white p-4 md:p-6">
       <FilterSheets
+        id='series'
         dataSheets={seriesComplete}
         dataSheetsGroup={seriesComplete.filter((item) => isNullOrEmpty(item.season))}
         onFilter={setFilteredSeries}

@@ -4,13 +4,14 @@ import { getValueOrDafault, isFlagTrue } from "../utils/utils";
 import { COLECAO_NAO, COLECAO_SIM, STATUS_BOOK_NOTR, STATUS_BOOK_P, STATUS_BOOK_R, STATUS_VIDEO_NOTW, STATUS_VIDEO_P, STATUS_VIDEO_W } from "../utils/constantes";
 
 export function FilterSheets({
+  id,
   dataSheets,
   dataSheetsGroup,
   onFilter,
   estatisticas,
   categoriesOptions = [],
   statusOptions = [],
-  categoryDefault,
+  categoryDefault = '',
   isVisibleShowRead = false,
   sortByDefault = 'year-desc'
 }) {
@@ -25,6 +26,7 @@ export function FilterSheets({
   const [showRead, setShowRead] = useState(false);
   const [showOwned, setShowOwned] = useState(false);
   const [showAdult, setShowAdult] = useState(false);
+  const [showAll, setShowAll] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState(sortByDefault);
 
@@ -67,12 +69,14 @@ export function FilterSheets({
       const matchesWatched = showWatched ? m?.watched === "W" : true;
       const matchesRead = showRead ? m.read === "R" : true;
       const matchesShowOwned = showOwned ? isFlagTrue(m.owned) : true;
-      const matchesAdult = showAdult
-        ? m.genre?.toLowerCase().includes("adult") || m.genre?.toLowerCase().includes("erotic")
-        : !(
-          m.genre?.toLowerCase().includes("adult") ||
-          m.genre?.toLowerCase().includes("erotic")
-        );
+      const matchesAdult =
+        showAll ? true : 
+        showAdult
+          ? m.genre?.toLowerCase().includes("adult") || m.genre?.toLowerCase().includes("erotic")
+          : !(
+            m.genre?.toLowerCase().includes("adult") ||
+            m.genre?.toLowerCase().includes("erotic")
+          );
       const matchesSearch = searchTerm
         ? [m.title, m.original_title, m.subtitle, m.publication_title, m.publisher, m.cast, m.authors]
           .filter(Boolean) // remove campos null/undefined/vazios
@@ -129,6 +133,7 @@ export function FilterSheets({
     showRead,
     showOwned,
     showAdult,
+    showAll,
     searchTerm,
     sortBy
   ]);
@@ -145,10 +150,13 @@ export function FilterSheets({
     showRead && { label: "Lidos", onClear: () => setShowRead(false) },
     showOwned && { label: "Na coleção", onClear: () => setShowOwned(false) },
     showAdult && { label: "+18", onClear: () => setShowAdult(false) },
+    showAll && { label: "Tudo", onClear: () => setShowAll(false) },
     searchTerm && { label: `Busca: "${searchTerm}"`, onClear: () => setSearchTerm("") },
   ].filter(Boolean);
 
   const totalFiltered = filtered.filter((m) => {
+    if (showAll) return true;
+
     const isAdult = m.genre?.toLowerCase().includes("adult") || m.genre?.toLowerCase().includes("erotic");
     return isAdult && showAdult ? true : !isAdult;
   });
@@ -161,6 +169,7 @@ export function FilterSheets({
 
   return (
     <FilterSheetsUI
+      id={id}
       searchTerm={searchTerm}
       setSearchTerm={setSearchTerm}
 
@@ -203,6 +212,9 @@ export function FilterSheets({
 
       showAdult={showAdult}
       setShowAdult={setShowAdult}
+
+      showAll={showAll}
+      setShowAll={setShowAll}
 
       sortBy={sortBy}
       setSortBy={setSortBy}

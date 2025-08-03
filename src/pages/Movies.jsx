@@ -4,9 +4,9 @@ import { ControlStatusComponent } from "../components/ControlStatusComponent";
 import { FilterSheets } from "../components/FilterSheets";
 import { Pagination } from "../components/Pagination";
 import { DataContext } from "../context/DataContext";
-import { fetchCastAndCrew, fetchTmdbMovieId, getSanitizedImage, getValueOrDafault } from "../utils/utils";
+import { fetchCastAndCrew, fetchTmdbMovieId, getSanitizedImage, getValueOrDafault, isNullOrEmpty } from "../utils/utils";
 import { useNavigate } from 'react-router-dom';
-import { STATUS_VIDEO_NOTW, STATUS_VIDEO_P, STATUS_VIDEO_W } from '../utils/constantes';
+import { SHEET_MOVIES, STATUS_VIDEO_NOTW, STATUS_VIDEO_P, STATUS_VIDEO_W } from '../utils/constantes';
 
 function MovieModal({ movie, movies, onClose, onSelectRelated }) {
   if (!movie) return null;
@@ -233,7 +233,6 @@ function MovieModal({ movie, movies, onClose, onSelectRelated }) {
 }
 
 export default function Filmes() {
-  const SHEET_NAME = 'Movies';
   const ITEMS_PER_PAGE = 24;
 
   const { dataSheets } = useContext(DataContext);
@@ -247,8 +246,8 @@ export default function Filmes() {
     }
   }, [dataSheets, navigate]);
 
-  const movies = dataSheets[SHEET_NAME] || [];
-  
+  const movies = dataSheets[SHEET_MOVIES] || [];
+
   const moviesComplete = useMemo(() => {
       return movies.map((m) => ({ ...m, status: m.watched }))
   }, [movies]);
@@ -261,16 +260,6 @@ export default function Filmes() {
   const [viewMode, setViewMode] = useState("grid"); // 'grid' ou 'list'
 
   const gridRef = useRef(null);
-
-  const isAdultGenre = (genre = "") =>
-    genre.toLowerCase().includes("adult") || genre.toLowerCase().includes("erotic");
-
-  const totalPages = Math.ceil(filteredMovies.length / ITEMS_PER_PAGE);
-
-  const paginated = filteredMovies.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
 
   useEffect(() => {
     setFilteredMovies(moviesComplete);
@@ -290,13 +279,15 @@ export default function Filmes() {
     }
   }, [currentPage]);
 
-  function getValueOrDafault(value, outher) {
-    return !isNullOrEmpty(value) ? value : outher;
-  }
+  const isAdultGenre = (genre = "") =>
+    genre.toLowerCase().includes("adult") || genre.toLowerCase().includes("erotic");
+ 
+  const totalPages = Math.ceil(filteredMovies.length / ITEMS_PER_PAGE);
 
-  function isNullOrEmpty(value) {
-    return value == null || String(value).trim() === '';
-  }
+  const paginated = filteredMovies.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   async function handleOpenModal(movie) {
     setLoadingTmdb(true);
@@ -324,6 +315,7 @@ export default function Filmes() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white p-4 md:p-6">
       <FilterSheets
+        id='movies'
         dataSheets={moviesComplete}
         onFilter={setFilteredMovies}
         sortByDefault={'year-desc'}
