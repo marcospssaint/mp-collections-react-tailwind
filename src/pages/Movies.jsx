@@ -148,29 +148,29 @@ function MovieModal({ movie, movies, onClose, onSelectRelated }) {
                       <h4 className="text-lg font-semibold mb-2">🎬 Direção</h4>
                       <div className="flex flex-wrap gap-4">
                         {movie.crew.map((person) => (
-                          <div key={person.id} className="w-24 text-center">
+                          <div key={person?.id} className="w-24 text-center">
                             <img
                               src={
-                                person.profile_path
+                                person?.profile_path
                                   ? `https://image.tmdb.org/t/p/w185${person.profile_path}`
                                   : `https://ui-avatars.com/api/?name=${encodeURIComponent(person.name)}&background=random&size=256&rounded=true&font-size=0.45`
                               }
-                              alt={person.name}
+                              alt={person?.name}
                               className="w-24 h-24 object-cover rounded-full mx-auto shadow"
                             />
-                            <p className="text-xs mt-2">{person.name}</p>
+                            <p className="text-xs mt-2">{person?.name}</p>
                           </div>
                         ))}
                       </div>
                     </>
                   )}
 
-                  {movie?.cast?.length > 0 && (
+                  {(movie?.cast?.length ) && (
                     <>
                       <h4 className="text-lg font-semibold mt-6 mb-2">⭐ Elenco</h4>
                       <div className="flex flex-wrap gap-4">
                         {movie?.cast?.map((actor) => (
-                          <div key={actor.id} className="w-24 text-center">
+                          <div key={actor?.id} className="w-24 text-center">
                             <img
                               src={
                                 actor.profile_path
@@ -298,6 +298,8 @@ export default function Filmes() {
         const tmdbData = await fetchCastAndCrew(tmdbId);
         setSelectedMovie({ ...movie, ...tmdbData });
       } else {
+        console.log('Não no tmdbId')
+
         setSelectedMovie(movie); // Sem dados TMDb, mas abre modal
       }
     } catch (error) {

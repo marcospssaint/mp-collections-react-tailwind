@@ -357,6 +357,9 @@ export default function Books() {
 
   const gridRef = useRef(null);
 
+  const isAdultGenre = (genre = "") =>
+    genre.toLowerCase().includes("adult") || genre.toLowerCase().includes("erotic");
+
   const totalPages = Math.ceil(filteredLivros.length / ITEMS_PER_PAGE);
 
   const paginated = filteredLivros.slice(
@@ -454,10 +457,24 @@ export default function Books() {
                     onClick={() => setSelectedLivro(livro)}
                   >
 
+                    {/* +18 Badge */}
+                    {isAdultGenre(livro?.genre) && (
+                      <span className="absolute top-2 left-2 bg-red-700 text-white text-[15px] font-semibold px-1.5 py-0.5 rounded shadow-md z-10">
+                        +18
+                      </span>
+                    )}
+
                     {/* Lido */}
                     {livro?.read === "R" && (
                       <span className="absolute top-2 right-2 bg-green-600 text-white text-[15px] font-semibold px-1.5 py-0.5 rounded shadow-md z-10">
                         Lido
+                      </span>
+                    )}
+
+                    {/* Parcialmente lido */}
+                    {livro?.read === "P" && (
+                      <span className="absolute top-2 right-2 bg-yellow-50 text-yellow-700 text-white text-[15px] font-semibold px-1.5 py-0.5 rounded shadow-md z-10">
+                        Parcialmente lido
                       </span>
                     )}
 
