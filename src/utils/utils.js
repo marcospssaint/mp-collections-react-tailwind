@@ -122,6 +122,39 @@ export function getOwnedList(valor) {
   return total;
 }
 
+export function expandRange(input) {
+  const result = [];
+
+  if (!isNaN(input)) {
+    const n = Number(input);
+    for (let i = 1; i <= n; i++) {
+      result.push(i);
+    }
+    return result;
+  }
+
+  // descarta tudo depois do "|"
+  input = input.split("|")[0];
+
+  // separa por vírgula
+  input.split(",").forEach(part => {
+    part = part.trim();
+
+    if (part.includes('-')) {
+      // intervalo
+      const [start, end] = part.split('-').map(Number);
+      for (let i = start; i <= end; i++) {
+        result.push(i);
+      }
+    } else {
+      // número único
+      result.push(Number(part));
+    }
+  });
+
+  return result;
+}
+
 export function getValueOrDafault(value, outher) {
   return !isNullOrEmpty(value) ? value : outher;
 }

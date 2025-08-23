@@ -14,7 +14,7 @@ import {
   STATUS_BOOK_R,
   STATUS_BOOK_NOTR
 } from "../utils/constantes";
-import { getOwnedList, getSanitizedImage, getValueOrDafault, isNotNullOrEmpty, isNullOrEmpty, isFlagTrue } from '../utils/utils';
+import { getOwnedList, getSanitizedImage, getValueOrDafault, isNotNullOrEmpty, isNullOrEmpty, isFlagTrue, expandRange } from '../utils/utils';
 import { ControlStatusComponent } from '../components/ControlStatusComponent';
 import { useNavigate } from 'react-router-dom';
 
@@ -30,6 +30,8 @@ function getTotalVolumes(volumeString) {
 function VolumesStatus({ totalVolumes, readVolume }) {
   const total = getTotalVolumes(totalVolumes);
   const totalNaColecao = getOwnedList(totalVolumes);
+  const arrayNaColecao = expandRange(totalVolumes);
+
   return (
     <div className="space-y-2">
       <div className="flex justify-between items-center mb-2 text-sm font-semibold text-gray-700">
@@ -40,7 +42,7 @@ function VolumesStatus({ totalVolumes, readVolume }) {
         {Array.from({ length: total }).map((_, idx) => {
           const volNum = idx + 1;
           const isRead = volNum <= readVolume;
-          const isOwned = volNum <= totalNaColecao;
+          const isOwned = arrayNaColecao.includes(volNum);
           return (
             <div
               key={volNum}
