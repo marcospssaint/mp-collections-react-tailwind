@@ -120,7 +120,7 @@ export function FilterSheets({
     }
 
     onFilter(finalList);
-    setFiltered(filtered);
+    setFiltered(finalList);
   }, [
     selectedGenre,
     selectedCountry,

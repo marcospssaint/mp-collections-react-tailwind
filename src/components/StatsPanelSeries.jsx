@@ -28,11 +28,19 @@ export default function StatsPanelSeries({ data = [] }) {
   const statsByCategory = useMemo(() => {
     return categories.map(({ key, label }) => {
       const items = data.filter((d) => d.category === key);
-      const total = items.filter((item) => isNullOrEmpty(item.season)).length;
-      const watched = getCount(items, (d) => d.watched === 'W');
-      const unwatched = total - watched;
 
-      return { key, label, total, watched, unwatched };
+      const grouped = items.reduce((acc, item) => {
+        if (!acc[item.title]) acc[item.title] = [];
+        acc[item.title].push(item);
+        return acc;
+      }, {});
+      
+      const total = Object.keys(grouped).length;
+      const totalWatched = Object.values(grouped)
+        .reduce((sum, items) => sum + getCount(items, (d) => d.watched === 'W'), 0);
+      const unwatched = total - totalWatched;
+
+      return { key, label, total, totalWatched, unwatched };
     });
   }, [data]);
 
@@ -65,9 +73,9 @@ export default function StatsPanelSeries({ data = [] }) {
       <h2 className="text-2xl font-bold mb-4">📺 Séries</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {statsByCategory.map(({ key, label, total, watched, unwatched }) => {
+        {statsByCategory.map(({ key, label, total, totalWatched, unwatched }) => {
           const pieData = [
-            { name: 'Assistidos', value: watched },
+            { name: 'Assistidos', value: totalWatched },
             { name: 'Pendentes', value: unwatched },
           ];
 
@@ -77,7 +85,7 @@ export default function StatsPanelSeries({ data = [] }) {
 
               <div className="grid grid-cols-3 gap-4 text-center mb-4">
                 <Indicator label="Total" value={total} />
-                <Indicator label="Assistidos" value={watched} color="green" />
+                <Indicator label="Assistidos" value={totalWatched} color="green" />
                 <Indicator label="Pendentes" value={unwatched} color="red" />
               </div>
 
