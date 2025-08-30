@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import FilterSheetsUI from "./FilterSheetsUI";
-import { getValueOrDafault, isFlagTrue } from "../utils/utils";
+import { getValueOrDafault, isAdultGenre, isFlagTrue } from "../utils/utils";
 import { COLECAO_NAO, COLECAO_SIM, STATUS_BOOK_NOTR, STATUS_BOOK_P, STATUS_BOOK_R, STATUS_VIDEO_NOTW, STATUS_VIDEO_P, STATUS_VIDEO_W } from "../utils/constantes";
 
 export function FilterSheets({
@@ -71,12 +71,7 @@ export function FilterSheets({
       const matchesShowOwned = showOwned ? isFlagTrue(m.owned) : true;
       const matchesAdult =
         showAll ? true : 
-        showAdult
-          ? m.genre?.toLowerCase().includes("adult") || m.genre?.toLowerCase().includes("erotic")
-          : !(
-            m.genre?.toLowerCase().includes("adult") ||
-            m.genre?.toLowerCase().includes("erotic")
-          );
+        showAdult ? isAdultGenre(m.genre) : !(isAdultGenre(m.genre));
       const matchesSearch = searchTerm
         ? [m.title, m.original_title, m.subtitle, m.publication_title, m.publisher, m.cast, m.authors]
           .filter(Boolean) // remove campos null/undefined/vazios
@@ -157,15 +152,13 @@ export function FilterSheets({
   const totalFiltered = filtered.filter((m) => {
     if (showAll) return true;
 
-    const isAdult = m.genre?.toLowerCase().includes("adult") || m.genre?.toLowerCase().includes("erotic");
+    const isAdult = isAdultGenre(m.genre);
     return isAdult && showAdult ? true : !isAdult;
   });
 
   const watchedCount = totalFiltered.filter((m) => m.watched === "W").length;
   const readCount = totalFiltered.filter((m) => m.read === "R").length;
-  const adultCount = totalFiltered.filter((m) =>
-    m.genre?.toLowerCase().includes("adult") || m.genre?.toLowerCase().includes("erotic")
-  ).length;
+  const adultCount = totalFiltered.filter((m) => isAdultGenre(m.genre)).length;
 
   return (
     <FilterSheetsUI

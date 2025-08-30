@@ -6,7 +6,7 @@ import { FilterSheets } from "../components/FilterSheets";
 import { Pagination } from "../components/Pagination";
 import { DataContext } from "../context/DataContext";
 import { CATEGORY_ANIMES, CATEGORY_TV_SHOWS, CATEGORY_TV_TOKUSATSU, SHEET_ANIMES, SHEET_SERIES, SHEET_TV_SHOWS, SHEET_TV_TOKUSATSU, STATUS_VIDEO_NOTW, STATUS_VIDEO_P, STATUS_VIDEO_W } from "../utils/constantes";
-import { getOwnedList, getSanitizedImage, isNotNullOrEmpty, isNullOrEmpty, isFlagTrue, getValueOrDafault } from "../utils/utils";
+import { getOwnedList, getSanitizedImage, isNotNullOrEmpty, isNullOrEmpty, isFlagTrue, getValueOrDafault, isAdultGenre } from "../utils/utils";
 import { ControlStatusComponent } from '../components/ControlStatusComponent';
 import { useNavigate } from 'react-router-dom';
 
@@ -168,7 +168,8 @@ function Modal({ data, onClose }) {
                       ? mainSeries.genre.split(",").map((g) => (
                         <span
                           key={g.trim()}
-                          className={`inline-block px-2 py-0.5 mr-1 rounded text-xs font-medium ${g.toLowerCase().includes("erotic") || g.toLowerCase().includes("adult")
+                          className={`inline-block px-2 py-0.5 mr-1 rounded text-xs font-medium ${
+                              g.toLowerCase().includes("erotic") || g.toLowerCase().includes("adult") || g.toLowerCase().includes("ecchi")
                             ? "bg-red-100 text-red-700"
                             : "bg-blue-100 text-blue-700"
                             }`}
@@ -276,9 +277,6 @@ export default function Series() {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   }, [currentPage]);
-
-  const isAdultGenre = (genre = "") =>
-    genre.toLowerCase().includes("adult") || genre.toLowerCase().includes("erotic");
 
   // Títulos únicos para paginação
   let uniqueTitles = [...new Set(filteredSeries.map((s) => s.title))];
@@ -521,7 +519,8 @@ export default function Series() {
                         Gênero: {main.genre?.split(",").map((g) => (
                           <span
                             key={g.trim()}
-                            className={`inline-block px-2 py-0.5 mr-1 rounded text-xs font-medium ${g.toLowerCase().includes("erotic") || g.toLowerCase().includes("adult")
+                            className={`inline-block px-2 py-0.5 mr-1 rounded text-xs font-medium ${
+                              isAdultGenre(g)
                               ? "bg-red-100 text-red-700"
                               : "bg-blue-100 text-blue-700"
                               }`}

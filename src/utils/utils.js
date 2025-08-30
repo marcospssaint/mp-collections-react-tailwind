@@ -171,3 +171,9 @@ export function getSanitizedImage(value) {
   if (isNullOrEmpty(value?.img)) return `${process.env.PUBLIC_URL}/imagens/imgDefault.png`;
   return value?.img?.replace(/"/g, "");
 }
+
+export function isAdultGenre(genre = "") {
+  return genre.toLowerCase().includes("adult") 
+    || genre.toLowerCase().includes("erotic")
+    || genre.toLowerCase().includes("ecchi");
+}

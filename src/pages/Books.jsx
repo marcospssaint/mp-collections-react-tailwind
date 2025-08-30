@@ -14,7 +14,7 @@ import {
   STATUS_BOOK_R,
   STATUS_BOOK_NOTR
 } from "../utils/constantes";
-import { getOwnedList, getSanitizedImage, getValueOrDafault, isNotNullOrEmpty, isNullOrEmpty, isFlagTrue, expandRange } from '../utils/utils';
+import { getOwnedList, getSanitizedImage, getValueOrDafault, isNotNullOrEmpty, isNullOrEmpty, isFlagTrue, expandRange, isAdultGenre } from '../utils/utils';
 import { ControlStatusComponent } from '../components/ControlStatusComponent';
 import { useNavigate } from 'react-router-dom';
 
@@ -359,9 +359,6 @@ export default function Books() {
 
   const gridRef = useRef(null);
 
-  const isAdultGenre = (genre = "") =>
-    genre.toLowerCase().includes("adult") || genre.toLowerCase().includes("erotic");
-
   const totalPages = Math.ceil(filteredLivros.length / ITEMS_PER_PAGE);
 
   const paginated = filteredLivros.slice(
@@ -592,7 +589,8 @@ export default function Books() {
                         Gênero: {livro.genre?.split(",").map((g) => (
                           <span
                             key={g.trim()}
-                            className={`inline-block px-2 py-0.5 mr-1 rounded text-xs font-medium ${g.toLowerCase().includes("erotic") || g.toLowerCase().includes("adult")
+                            className={`inline-block px-2 py-0.5 mr-1 rounded text-xs font-medium ${
+                              isAdultGenre(g)
                               ? "bg-red-100 text-red-700"
                               : "bg-blue-100 text-blue-700"
                               }`}
