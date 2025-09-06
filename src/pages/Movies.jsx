@@ -1,10 +1,11 @@
 import { ListBulletIcon, Squares2X2Icon } from '@heroicons/react/24/outline';
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { Bookmark } from "lucide-react";
 import { ControlStatusComponent } from "../components/ControlStatusComponent";
 import { FilterSheets } from "../components/FilterSheets";
 import { Pagination } from "../components/Pagination";
 import { DataContext } from "../context/DataContext";
-import { fetchCastAndCrew, fetchTmdbMovieId, getSanitizedImage, getValueOrDafault, isNullOrEmpty } from "../utils/utils";
+import { fetchCastAndCrew, fetchTmdbMovieId, getSanitizedImage, getValueOrDafault, isFlagTrue, isNullOrEmpty } from "../utils/utils";
 import { useNavigate } from 'react-router-dom';
 import { SHEET_MOVIES, STATUS_VIDEO_NOTW, STATUS_VIDEO_P, STATUS_VIDEO_W } from '../utils/constantes';
 
@@ -415,12 +416,20 @@ export default function Filmes() {
                     </div>
 
                     {/* Conteúdo */}
-                    <div className="p-3 flex flex-col flex-grow text-center">
-                      <h3 className="text-sm font-semibold line-clamp-2">{movie?.subtitle || movie?.title}</h3>
+                     <div className="p-3 flex flex-col flex-grow text-center">
+                      <div className="flex justify-center items-center gap-3">
+                        <h3 className="text-sm font-semibold line-clamp-2">{movie?.subtitle || movie?.title}</h3>
+
+                        <div className="flex gap-1 text-gray-500 text-xs">
+                          {isFlagTrue(movie?.owned) && <Bookmark title="Na coleção" size={16} />}
+                        </div>
+                        
+                      </div>
                       {movie?.subtitle && (
-                        <p className="text-xs text-gray-500 dark:text-gray-400 italic">{movie.title}</p>
-                      )}
-                      <p className="text-[11px] text-gray-400 dark:text-gray-300 mt-1">{movie?.year || "Ano desconhecido"}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 italic">{movie.title}</p>
+                        )}
+
+                      <p className="text-xs text-center text-gray-600 mt-1">{movie?.year || "Ano desconhecido"}</p>
                     </div>
                   </div>
                 );
