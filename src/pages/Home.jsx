@@ -154,11 +154,11 @@ export default function Home() {
   );
   const panels = [
     {
-      key: <StatsPanel title="🎬 Filmes" slug="movies" data={dataSheets[SHEET_MOVIES] || []} />,
+      key: <StatsPanel title="🎬 Movies" slug="movies" data={dataSheets[SHEET_MOVIES] || []} />,
       title: 'Filmes',
       slug: 'movies',
       data: dataSheets[SHEET_MOVIES],
-      category: 'Filmes',
+      category: 'Movies',
     },
     {
       key: <StatsPanelSeries title="📺 Séries" slug="series" data={dataSheets[SHEET_SERIES] || []} />,

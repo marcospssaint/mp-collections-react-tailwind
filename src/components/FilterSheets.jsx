@@ -25,6 +25,7 @@ export function FilterSheets({
   const [showWatched, setShowWatched] = useState(false);
   const [showRead, setShowRead] = useState(false);
   const [showOwned, setShowOwned] = useState(false);
+  const [showTelegram, setShowTelegram] = useState(false);
   const [showAdult, setShowAdult] = useState(false);
   const [showAll, setShowAll] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -69,6 +70,7 @@ export function FilterSheets({
       const matchesWatched = showWatched ? m?.watched === "W" : true;
       const matchesRead = showRead ? m.read === "R" : true;
       const matchesShowOwned = showOwned ? isFlagTrue(m.owned) : true;
+      const matchesShowTelegram = showTelegram ? isFlagTrue(m.telegram) : true;
       const matchesAdult =
         showAll ? true : 
         showAdult ? isAdultGenre(m.genre) : !(isAdultGenre(m.genre));
@@ -91,6 +93,7 @@ export function FilterSheets({
         matchesWatched &&
         matchesRead &&
         matchesShowOwned &&
+        matchesShowTelegram &&
         matchesAdult &&
         matchesSearch
       );
@@ -127,6 +130,7 @@ export function FilterSheets({
     showWatched,
     showRead,
     showOwned,
+    showTelegram,
     showAdult,
     showAll,
     searchTerm,
@@ -144,6 +148,7 @@ export function FilterSheets({
     showWatched && { label: "Assistidos", onClear: () => setShowWatched(false) },
     showRead && { label: "Lidos", onClear: () => setShowRead(false) },
     showOwned && { label: "Na coleção", onClear: () => setShowOwned(false) },
+    showTelegram && { label: "No telegram", onClear: () => setShowTelegram(false) },
     showAdult && { label: "+18", onClear: () => setShowAdult(false) },
     showAll && { label: "Tudo", onClear: () => setShowAll(false) },
     searchTerm && { label: `Busca: "${searchTerm}"`, onClear: () => setSearchTerm("") },
@@ -202,6 +207,9 @@ export function FilterSheets({
 
       setShowOwned={setShowOwned}
       showOwned={showOwned}
+
+      showTelegram={showTelegram}
+      setShowTelegram={setShowTelegram}
 
       showAdult={showAdult}
       setShowAdult={setShowAdult}

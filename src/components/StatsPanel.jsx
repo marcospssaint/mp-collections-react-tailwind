@@ -17,11 +17,7 @@ export default function StatsPanel({ data = [], title = '🎬 Itens', slug = 'it
     const owned = getCount(data, (d) => isFlagTrue(d.owned));
     const unwatched = total - watched;
 
-    const genres = Array.from(new Set(
-      data.flatMap((d) =>
-        d.genre ? d.genre.split(',').map((g) => g.trim().toLowerCase()) : []
-      )
-    ));
+    const telegram = getCount(data, (d) => isFlagTrue(d.telegram));
 
     const countries = Array.from(new Set(
       data.flatMap((d) =>
@@ -41,7 +37,7 @@ export default function StatsPanel({ data = [], title = '🎬 Itens', slug = 'it
       watched,
       unwatched,
       owned,
-      genres: genres.length,
+      telegram,
       countries: countries.length,
       adultCount
     };
@@ -88,8 +84,7 @@ export default function StatsPanel({ data = [], title = '🎬 Itens', slug = 'it
             <Indicator label="✅ Assistidos" value={stats.watched} color="green" />
             <Indicator label="📌 Pendentes" value={stats.unwatched} color="red" />
             <Indicator label="🗂️ Na coleção" value={stats.owned} color="blue" />
-            <Indicator label="🌍 Países" value={stats.countries} color="indigo" />
-            <Indicator label="🎭 Gêneros" value={stats.genres} color="purple" />
+            <Indicator label="📱 Telegram" value={stats.telegram} color="purple" />
             <Indicator label="🔞 +18" value={stats.adultCount} color="rose" />
           </div>
         </div>

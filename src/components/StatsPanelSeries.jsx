@@ -4,11 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import { Cell, Pie, PieChart, ResponsiveContainer } from 'recharts';
 
 import {
-    CATEGORY_ANIMES,
-    CATEGORY_TV_SHOWS,
-    CATEGORY_TV_TOKUSATSU
+  CATEGORY_ANIMES,
+  CATEGORY_TV_SHOWS,
+  CATEGORY_TV_TOKUSATSU
 } from "../utils/constantes";
-import { isNullOrEmpty } from '../utils/utils';
+import { isAdultGenre, isFlagTrue, isNullOrEmpty } from '../utils/utils';
 
 const COLORS = ['#10B981', '#EF4444']; // Assistidos / Pendentes
 
@@ -19,9 +19,9 @@ export default function StatsPanelSeries({ data = [] }) {
 
   // Categorias fixas
   const categories = [
-    { key: CATEGORY_TV_SHOWS, label: 'TV Shows' },
-    { key: CATEGORY_ANIMES, label: 'Animes' },
-    { key: CATEGORY_TV_TOKUSATSU, label: 'Tokusatsu' },
+    { key: CATEGORY_TV_SHOWS, label: 'TV Shows', slug: 'series' },
+    { key: CATEGORY_ANIMES, label: 'Animes', slug: 'animes' },
+    { key: CATEGORY_TV_TOKUSATSU, label: 'Tokusatsu', slug: 'tokusatsu' },
   ];
 
   // Dados agrupados e estatísticas
@@ -29,18 +29,28 @@ export default function StatsPanelSeries({ data = [] }) {
     return categories.map(({ key, label }) => {
       const items = data.filter((d) => d.category === key);
 
-      const grouped = items.reduce((acc, item) => {
-        if (!acc[item.title]) acc[item.title] = [];
-        acc[item.title].push(item);
-        return acc;
-      }, {});
-      
-      const total = Object.keys(grouped).length;
-      const totalWatched = Object.values(grouped)
-        .reduce((sum, items) => sum + getCount(items, (d) => d.watched === 'W'), 0);
+      let uniqueTitles = [...new Set(items.map((s) => s.title))];
+      const total = uniqueTitles.length;
+
+      const totalWatched = items.filter((item) => isNullOrEmpty(item.season))
+        .filter((f) => items.filter((m) => m?.watched === "W").some((g) => g.title === f.title))
+        .length;
+
       const unwatched = total - totalWatched;
 
-      return { key, label, total, totalWatched, unwatched };
+      const totalOwned = items.filter((item) => isNullOrEmpty(item.season))
+        .filter((f) => items.filter((m) => isFlagTrue(m.owned)).some((g) => g.title === f.title))
+        .length;
+
+      const totalTelegram = items.filter((item) => isNullOrEmpty(item.season))
+        .filter((f) => items.filter((m) => isFlagTrue(m.telegram)).some((g) => g.title === f.title))
+        .length;
+
+      const totalAdult = items.filter((item) => isNullOrEmpty(item.season))
+        .filter((f) => items.filter((m) => isAdultGenre(m.genre)).some((g) => g.title === f.title))
+        .length;
+
+      return { key, label, total, totalWatched, unwatched, totalOwned, totalTelegram, totalAdult };
     });
   }, [data]);
 
@@ -70,10 +80,10 @@ export default function StatsPanelSeries({ data = [] }) {
       className="rounded-xl border p-4 shadow-md bg-white cursor-pointer hover:scale-[1.02] transition-transform"
       onClick={() => navigate(`/series`)}
     >
-      <h2 className="text-2xl font-bold mb-4">📺 Séries</h2>
+      <h2 className="text-2xl font-bold mb-4">📺 Séries (<CountUp end={[...new Set(data.map((s) => s.title))].length} duration={1.5} /> itens) </h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {statsByCategory.map(({ key, label, total, totalWatched, unwatched }) => {
+      <div className="">
+        {statsByCategory.map(({ key, label, total, totalWatched, unwatched, totalOwned, totalTelegram, totalAdult }) => {
           const pieData = [
             { name: 'Assistidos', value: totalWatched },
             { name: 'Pendentes', value: unwatched },
@@ -81,33 +91,43 @@ export default function StatsPanelSeries({ data = [] }) {
 
           return (
             <div key={key} className="bg-gray-50 rounded-lg p-4 shadow-inner">
-              <h3 className="text-lg font-semibold mb-3">{label}</h3>
+              <h3 className="text-lg font-bold mb-3">{label}</h3>
 
-              <div className="grid grid-cols-3 gap-4 text-center mb-4">
-                <Indicator label="Total" value={total} />
-                <Indicator label="Assistidos" value={totalWatched} color="green" />
-                <Indicator label="Pendentes" value={unwatched} color="red" />
-              </div>
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 grid grid-cols-1 sm:grid-cols-2 gap-6 items-center">
+                {/* Indicadores */}
+                <div className="space-y-2">
 
-              <div className="w-full h-32">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={pieData}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={60}
-                      dataKey="value"
-                      label={({ name, percent }) =>
-                        `${name}: ${(percent * 100).toFixed(0)}%`
-                      }
-                    >
-                      {pieData.map((_, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index]} />
-                      ))}
-                    </Pie>
-                  </PieChart>
-                </ResponsiveContainer>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-center">
+                    <Indicator label="🎞️ Total" value={total} />
+                    <Indicator label="✅ Assistidos" value={totalWatched} color="green" />
+                    <Indicator label="📌 Pendentes" value={unwatched} color="red" />
+                    <Indicator label="🗂️ Na coleção" value={totalOwned} color="blue" />
+                    <Indicator label="📱 Telegram" value={totalTelegram} color="purple" />
+                    <Indicator label="🔞 +18" value={totalAdult} color="rose" />
+                  </div>
+                </div>
+
+                {/* Gráfico */}
+                <div className="w-full h-60">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={pieData}
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={60}
+                        dataKey="value"
+                        label={({ name, percent }) =>
+                          `${name}: ${(percent * 100).toFixed(0)}%`
+                        }
+                      >
+                        {pieData.map((_, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index]} />
+                        ))}
+                      </Pie>
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
             </div>
           );
