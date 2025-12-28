@@ -1,5 +1,5 @@
 import { ListBulletIcon, Squares2X2Icon } from '@heroicons/react/24/outline';
-import { Bookmark, Eye, TvIcon } from "lucide-react";
+import { Bookmark, Eye, Rss, TvIcon } from "lucide-react";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
 
 import { FilterSheets } from "../components/FilterSheets";
@@ -46,7 +46,7 @@ function VolumesStatus({ totalVolumes, readVolume }) {
           return (
             <div
               key={volNum}
-              className={`w-6 h-6 text-xs flex items-center justify-center rounded ${isRead ? "bg-green-500 text-white" : isOwned ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-400" }`}
+              className={`w-6 h-6 text-xs flex items-center justify-center rounded ${isRead ? "bg-green-500 text-white" : isOwned ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-400"}`}
               title={`Volume ${volNum} ${isRead ? "(Lido)" : ""}`}
             >
               {volNum}
@@ -332,7 +332,7 @@ export default function Books() {
       navigate("/home", { replace: true });
     }
   }, [dataSheets, navigate]);
-  
+
   const livros = dataSheets[SHEET_LIVROS] || [];
 
   const livrosComplete = useMemo(() => {
@@ -463,9 +463,15 @@ export default function Books() {
                       </span>
                     )}
 
+                    <BadgeLanguage 
+                      className={'absolute top-2 right-2 text-[15px] font-semibold px-1.5 py-0.5 rounded shadow-md z-10'} 
+                      livro={livro} />
+
                     {/* Lido */}
                     {livro?.read === "R" && (
-                      <span className="absolute top-2 right-2 bg-green-600 text-white text-[15px] font-semibold px-1.5 py-0.5 rounded shadow-md z-10">
+                      <span
+                        style={{ bottom: '4.5rem' }}
+                        className="absolute right-2 bg-green-600 text-white text-[15px] font-semibold px-1.5 py-0.5 rounded shadow-md z-10">
                         Lido
                       </span>
                     )}
@@ -508,12 +514,12 @@ export default function Books() {
                           </p>
                         </>
                       )}
-                    </div>
 
-                    <BadgeIdioma
-                      livro={livro}
-                      className={'absolute bottom-2 right-2 text-[10px] px-2 py-0.5 rounded-full font-medium shadow-sm'}
-                    />
+                    </div>
+                    <div className="absolute bottom-2 right-2 text-[10px] px-2 py-0.5 rounded-full font-medium shadow-sm">
+                      {isFlagTrue(livro?.owned) && <Bookmark title="Na coleção" size={16} />}
+                      {isFlagTrue(livro?.telegram) && <Rss title="No telegram" size={16} />}
+                    </div>
                   </div>
                 );
               })}
@@ -589,8 +595,7 @@ export default function Books() {
                         Gênero: {livro.genre?.split(",").map((g) => (
                           <span
                             key={g.trim()}
-                            className={`inline-block px-2 py-0.5 mr-1 rounded text-xs font-medium ${
-                              isAdultGenre(g)
+                            className={`inline-block px-2 py-0.5 mr-1 rounded text-xs font-medium ${isAdultGenre(g)
                               ? "bg-red-100 text-red-700"
                               : "bg-blue-100 text-blue-700"
                               }`}
@@ -657,6 +662,35 @@ function BadgeIdioma({ livro, className }) {
                 : "bg-gray-200 text-gray-700"
         }`}>
       {livro.language.toUpperCase()}
+    </span>
+  )
+}
+
+function BadgeLanguage({ livro, className }) {
+  if (isNullOrEmpty(livro?.language)) return <></>
+  return (
+    <span
+      className={`${className}
+           ${livro.language === "English"
+          ? "bg-blue-100 text-blue-700"
+          : livro.language === "Portugues"
+            ? "bg-green-100 text-green-600"
+            : livro.language === "Spanish"
+              ? "bg-red-100 text-red-700"
+              : livro.language === "French"
+                ? "bg-indigo-100 text-indigo-700"
+                : "bg-gray-200 text-gray-700"
+        }`}>
+      {livro.language === "English"
+        ? "🇺🇸"
+        : livro.language === "Portugues"
+          ? "🇧🇷"
+          : livro.language === "Spanish"
+            ? "🇪🇸"
+            : livro.language === "French"
+              ? "🇫🇷"
+              : "🇯🇵"
+      }
     </span>
   )
 }

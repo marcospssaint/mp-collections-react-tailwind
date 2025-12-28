@@ -9,9 +9,9 @@ export default function FilterSheetsUI({
     selectedYear, yearsOptions, setSelectedYear,
     selectedLanguage, languagesOptions, setSelectedLanguage,
     selectedCategory, categoriesOptions, setSelectedCategory,
-
     selectedStatus, statusOptions, setSelectedStatus,
     selectedOwned, ownedOptions, setSelectedOwned,
+    selectedTelegram, telegramOptions, setSelectedTelegram,
     showWatched, setShowWatched,
     showRead, setShowRead,
     showOwned, setShowOwned,
@@ -58,14 +58,17 @@ export default function FilterSheetsUI({
                     <div className="md:col-span-1 sm:col-span-1 col-span-1">
                         {renderSelectBox("Na Coleção", selectedOwned, setSelectedOwned, ownedOptions)}
                     </div>
+                    <div className="md:col-span-1 sm:col-span-1 col-span-1">
+                        {renderSelectBox("No Telegram", selectedTelegram, setSelectedTelegram, telegramOptions)}
+                    </div>
                 </div>
 
                 {/* Toggles e Ordenação */}
                 <div className="flex flex-wrap items-center gap-4 mt-2">
                     {!isVisibleShowRead && <Toggle checked={showWatched} onChange={setShowWatched} label="Assistidos" />}
                     {isVisibleShowRead && <Toggle checked={showRead} onChange={setShowRead} label="Lidos" />}
-                    <Toggle checked={showOwned} onChange={setShowOwned} label="Na coleção" />
-                    <Toggle checked={showTelegram} onChange={setShowTelegram} label="No telegram" />
+                    <Toggle checked={showOwned} onChange={setShowOwned} label="Na Coleção" />
+                    <Toggle checked={showTelegram} onChange={setShowTelegram} label="No Telegram" />
                     <Toggle checked={showAdult} onChange={setShowAdult} label="Mostrar +18" />
                     <Toggle checked={showAll} onChange={setShowAll} label="Mostrar Tudo" />
 

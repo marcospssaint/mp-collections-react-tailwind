@@ -1,5 +1,5 @@
 import { ListBulletIcon, Squares2X2Icon } from '@heroicons/react/24/outline';
-import { Bookmark, Eye, TvIcon } from "lucide-react";
+import { Bookmark, Rss } from "lucide-react";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
 
 import { FilterSheets } from "../components/FilterSheets";
@@ -354,6 +354,11 @@ export default function Series() {
     return seasons.length > 0 && seasons.every((item) => item.owned === 'TRUE');
   };
 
+  const checkTelegram = (title) => {
+    const serie = seriesComplete.filter((item) => item.title === title);
+    return serie.some((item) => item.telegram === 'TRUE');
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white p-4 md:p-6">
       <FilterSheets
@@ -417,6 +422,7 @@ export default function Series() {
 
                 const allWatched = checkAllSeasonsWatched(s.title);
                 const allOwned = checkAllSeasonsOwned(s.title);
+                const isTelegram = checkTelegram(s.title);
                 const imageSrc = getSanitizedImage(main);
 
                 return (
@@ -464,7 +470,9 @@ export default function Series() {
 
                         <div className="flex gap-1 text-gray-500 text-xs">
                           {allOwned && <Bookmark title="Todas as temporadas na coleção" size={16} />}
+                          {isTelegram && <Rss title="No telegram" size={16} />}
                         </div>
+
                       </div>
 
                       <p className="text-xs text-center text-gray-600 mt-1">{main?.year}</p>

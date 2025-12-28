@@ -1,6 +1,6 @@
 import { ListBulletIcon, Squares2X2Icon } from '@heroicons/react/24/outline';
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
-import { Bookmark } from "lucide-react";
+import { Bookmark, Rss } from "lucide-react";
 import { ControlStatusComponent } from "../components/ControlStatusComponent";
 import { FilterSheets } from "../components/FilterSheets";
 import { Pagination } from "../components/Pagination";
@@ -166,7 +166,7 @@ function MovieModal({ movie, movies, onClose, onSelectRelated }) {
                     </>
                   )}
 
-                  {(movie?.cast?.length ) && (
+                  {(movie?.cast?.length > 0 ) && (
                     <>
                       <h4 className="text-lg font-semibold mt-6 mb-2">⭐ Elenco</h4>
                       <div className="flex flex-wrap gap-4">
@@ -422,6 +422,7 @@ export default function Filmes() {
 
                         <div className="flex gap-1 text-gray-500 text-xs">
                           {isFlagTrue(movie?.owned) && <Bookmark title="Na coleção" size={16} />}
+                          {isFlagTrue(movie?.telegram) && <Rss title="No telegram" size={16} />}
                         </div>
                         
                       </div>

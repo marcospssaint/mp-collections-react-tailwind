@@ -22,6 +22,7 @@ export function FilterSheets({
   const [selectedCategory, setSelectedCategory] = useState();
   const [selectedStatus, setSelectedStatus] = useState();
   const [selectedOwned, setSelectedOwned] = useState();
+  const [selectedTelegram, setSelectedTelegram] = useState();
   const [showWatched, setShowWatched] = useState(false);
   const [showRead, setShowRead] = useState(false);
   const [showOwned, setShowOwned] = useState(false);
@@ -67,6 +68,7 @@ export function FilterSheets({
       const matchesCategory = selectedCategory ? m?.category === selectedCategory : true;
       const matchesStatus = getValueStatus(selectedStatus) ? m.status === getValueStatus(selectedStatus) : true;
       const matchesOwned = selectedOwned ? (COLECAO_SIM === selectedOwned ? m.owned === 'TRUE' : m.owned === 'FALSE') : true;
+      const matchesTelegram = selectedTelegram ? (COLECAO_SIM === selectedTelegram ? m.telegram === 'TRUE' : m.telegram === 'FALSE') : true;
       const matchesWatched = showWatched ? m?.watched === "W" : true;
       const matchesRead = showRead ? m.read === "R" : true;
       const matchesShowOwned = showOwned ? isFlagTrue(m.owned) : true;
@@ -88,6 +90,7 @@ export function FilterSheets({
         matchesCategory &&
         matchesStatus &&
         matchesOwned &&
+        matchesTelegram &&
         matchesYear &&
         matchesLanguage &&
         matchesWatched &&
@@ -127,6 +130,7 @@ export function FilterSheets({
     selectedCategory,
     selectedStatus,
     selectedOwned,
+    selectedTelegram,
     showWatched,
     showRead,
     showOwned,
@@ -145,6 +149,7 @@ export function FilterSheets({
     selectedCategory && { label: selectedCategory, onClear: () => setSelectedCategory("") },
     selectedStatus && { label: selectedStatus, onClear: () => setSelectedStatus("") },
     selectedOwned && { label: selectedOwned, onClear: () => setSelectedOwned("") },
+    selectedTelegram && { label: selectedTelegram, onClear: () => setSelectedTelegram("") },
     showWatched && { label: "Assistidos", onClear: () => setShowWatched(false) },
     showRead && { label: "Lidos", onClear: () => setShowRead(false) },
     showOwned && { label: "Na coleção", onClear: () => setShowOwned(false) },
@@ -198,6 +203,10 @@ export function FilterSheets({
       selectedOwned={selectedOwned}
       ownedOptions={[COLECAO_SIM, COLECAO_NAO]}
       setSelectedOwned={setSelectedOwned}
+
+      selectedTelegram={selectedTelegram}
+      telegramOptions={[COLECAO_SIM, COLECAO_NAO]}
+      setSelectedTelegram={setSelectedTelegram}
 
       showWatched={showWatched}
       setShowWatched={setShowWatched}
