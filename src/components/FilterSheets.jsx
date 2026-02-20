@@ -67,8 +67,8 @@ export function FilterSheets({
       const matchesLanguage = selectedLanguage ? m.language?.includes(selectedLanguage) : true;
       const matchesCategory = selectedCategory ? m?.category === selectedCategory : true;
       const matchesStatus = getValueStatus(selectedStatus) ? m.status === getValueStatus(selectedStatus) : true;
-      const matchesOwned = selectedOwned ? (COLECAO_SIM === selectedOwned ? m.owned === 'TRUE' : m.owned === 'FALSE') : true;
-      const matchesTelegram = selectedTelegram ? (COLECAO_SIM === selectedTelegram ? m.telegram === 'TRUE' : m.telegram === 'FALSE') : true;
+      const matchesOwned = selectedOwned ? (COLECAO_SIM === selectedOwned ? isFlagTrue(m.owned) : m.owned === 'FALSE') : true;
+      const matchesTelegram = selectedTelegram ? (COLECAO_SIM === selectedTelegram ? isFlagTrue(m.telegram) : m.telegram === 'FALSE') : true;
       const matchesWatched = showWatched ? m?.watched === "W" : true;
       const matchesRead = showRead ? m.read === "R" : true;
       const matchesShowOwned = showOwned ? isFlagTrue(m.owned) : true;

@@ -13,7 +13,7 @@ import { useNavigate } from 'react-router-dom';
 function getTotalEpisodes(episodesString) {
   if (typeof episodesString === 'string') {
     const [, total] = episodesString?.split("|").map(s => s.trim());
-    return Number(total) || episodesString;
+    return Number(total) || Number(episodesString.trim());
   }
   return episodesString;
 }
@@ -161,6 +161,22 @@ function Modal({ data, onClose }) {
                     {mainSeries?.original_title}
                   </p>
                 )}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm sm:text-base">
+                  <div className="flex flex-wrap gap-1">
+                    <strong>Ano:</strong>
+                    <span className="text-gray-500">{mainSeries?.year}</span>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm sm:text-base">
+                  <div className="flex flex-wrap gap-1">
+                    <strong>Total Episódio:</strong>
+                    <span className="text-gray-500">
+                      {seasons
+                        .map((season) => getTotalEpisodes(season.episodes))
+                        .reduce((soma, episodeAtual) => soma + episodeAtual, 0).toString().padStart(2, '0')}
+                    </span>
+                  </div>
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm sm:text-base">
                   <div className="flex flex-wrap gap-1">
                     <strong>Gênero:</strong>
@@ -357,7 +373,7 @@ export default function Series() {
   const checkTelegram = (title) => {
     const serie = seriesComplete.filter((item) => item.title === title);
     return serie.some((item) => item.telegram === 'TRUE');
-  };
+  }; 
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white p-4 md:p-6">
