@@ -167,6 +167,16 @@ function Modal({ data, onClose }) {
                     <span className="text-gray-500">{mainSeries?.year}</span>
                   </div>
                 </div>
+                {mainSeries.category === CATEGORY_TV_SHOWS &&
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm sm:text-base">
+                    <div className="flex flex-wrap gap-1">
+                      <strong>Total Temporada:</strong>
+                      <span className="text-gray-500">
+                        {seasons.length.toString().padStart(2, '0')}
+                      </span>
+                    </div>
+                  </div>
+                }
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm sm:text-base">
                   <div className="flex flex-wrap gap-1">
                     <strong>Total Episódio:</strong>
@@ -370,6 +380,19 @@ export default function Series() {
     return seasons.length > 0 && seasons.every((item) => item.owned === 'TRUE');
   };
 
+  const totalEpisodeSeasons = (title) => {
+    const seasons = seriesComplete.filter((item) => item.title === title && !isNullOrEmpty(item.season));
+    if (seasons.length === 0) return 0; // sem temporadas
+    return seasons
+      .map((season) => getTotalEpisodes(season.episodes))
+      .reduce((soma, episodeAtual) => soma + episodeAtual, 0).toString().padStart(2, '0');
+  };
+
+  const totalSeasons = (title) => {
+    const seasons = seriesComplete.filter((item) => item.title === title && !isNullOrEmpty(item.season));
+    return seasons.length.toString().padStart(2, '0'); 
+  };
+
   const checkTelegram = (title) => {
     const serie = seriesComplete.filter((item) => item.title === title);
     return serie.some((item) => item.telegram === 'TRUE');
@@ -507,6 +530,8 @@ export default function Series() {
           {paginatedSeries.map((s) => {
             const allWatched = checkStatusSeasonsWatched(s.title);
             const allOwned = checkAllSeasonsOwned(s.title);
+            const totalSeason = totalSeasons(s.title);
+            const totalEpisodes = totalEpisodeSeasons(s.title);
 
             const mainSerie = seriesComplete.find((item) => item.title === s.title && isNullOrEmpty(item.season)) || s;
 
@@ -536,6 +561,24 @@ export default function Series() {
                         <strong>Ano:</strong> {main.year}
                       </span>
                     )}
+                  </div>
+                  {main.category === CATEGORY_TV_SHOWS &&
+                    <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                      <div className="flex flex-wrap gap-1">
+                        <strong>Temporada:</strong>
+                        <span className="text-gray-500">
+                          {totalSeason}
+                        </span>
+                      </div>
+                    </div>
+                  }
+                <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                    <div className="flex flex-wrap gap-1">
+                      <strong>Episodio:</strong>
+                      <span className="text-gray-500">
+                        {totalEpisodes}
+                      </span>
+                    </div>
                   </div>
                   <div className="flex flex-wrap gap-3 mt-1 text-sm text-gray-700">
                     {main.genre && (

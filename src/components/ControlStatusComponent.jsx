@@ -1,9 +1,11 @@
+import { Rss } from "lucide-react";
 import { isFlagTrue } from "../utils/utils";
 
 export function ControlStatusComponent({ data, status }) {
     const owned = isFlagTrue(data?.owned);
+    const isTelegram = isFlagTrue(data?.telegram)
     return (
-        <div className="mt-4 grid gap-2 sm:grid-cols-2 text-sm">
+        <div className="mt-4 grid gap-3 sm:grid-cols-3 text-sm">
             <div className="flex items-center gap-2">
                 <div className={`flex items-center gap-1 px-3 py-1 rounded-full shadow-sm ${
                     owned ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"
@@ -14,6 +16,15 @@ export function ControlStatusComponent({ data, status }) {
                 </div>
             </div>
             {renderStatus({ ...status })}
+            <div className="flex items-center gap-2">
+                <div className={`flex items-center gap-1 px-3 py-1 rounded-full shadow-sm ${
+                    isTelegram ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"
+                }`}>
+                    <span className="text-base"><Rss title="No telegram" size={16} /></span>
+                    <span className="font-semibold">No telegram:</span>
+                    <span>{isTelegram? "Sim" : "Não"}</span>
+                </div>
+            </div>
         </div>
     )
 }
